@@ -28,6 +28,11 @@ const router = createRouter({
       component: () => import('@/views/SettingsView.vue')
     },
     {
+      path: '/budget',
+      name: 'Budget',
+      component: () => import('@/views/BudgetView.vue')
+    },
+    {
       path: '/objectifs',
       name: 'Objectifs',
       component: () => import('@/views/ObjectivesView.vue')

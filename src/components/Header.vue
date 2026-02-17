@@ -25,8 +25,12 @@
           <span class="nav-icon">📊</span>
           Cash Flow
         </RouterLink>
-        <RouterLink to="/objectifs" class="nav-link">
+        <RouterLink to="/budget" class="nav-link">
           <span class="nav-icon">🎯</span>
+          Budget
+        </RouterLink>
+        <RouterLink to="/objectifs" class="nav-link">
+          <span class="nav-icon">🏆</span>
           Objectifs
         </RouterLink>
         <RouterLink to="/parametres" class="nav-link">

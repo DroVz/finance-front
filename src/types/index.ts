@@ -185,3 +185,33 @@ export interface CsvImportResult {
   importedCount: number;
   skippedCount: number;
 }
+
+// Types pour le Budget
+
+export type BudgetRuleType = 'MAXIMUM' | 'MINIMUM' | 'TARGET';
+
+export interface BudgetRule {
+  id: number;
+  name: string;
+  description: string | null;
+  ruleType: BudgetRuleType;
+  percentage: number;
+  categoryId: number | null;
+  categoryName: string | null;
+  categoryColor: string | null;
+  monthlyIncome: number;
+  ruleAmount: number;
+  currentAmount: number;
+  currentPercentage: number;
+  difference: number;
+  status: 'RESPECTED' | 'EXCEEDED';
+  createdAt: string;
+}
+
+export interface BudgetRuleDTO {
+  name: string;
+  description?: string | null;
+  ruleType: BudgetRuleType;
+  percentage: number;
+  categoryId?: number | null;
+}
