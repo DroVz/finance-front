@@ -9,15 +9,27 @@
       <button class="btn btn-primary" @click="openCreateModal">+ Nouvelle règle</button>
     </div>
 
+    <!-- Sélecteur de mois -->
+    <BudgetMonthSelector
+      v-model="selectedMonth"
+      @update:modelValue="onMonthChange"
+    />
+
     <!-- Carte revenus du mois -->
     <div class="income-card">
       <div class="income-icon">📈</div>
       <div>
-        <div class="income-label">Revenus du mois en cours</div>
+        <div class="income-label">Revenus de {{ formattedSelectedMonth }}</div>
         <div class="income-value">{{ formatCurrency(budgetStore.monthlyIncome) }}</div>
         <div class="income-hint">Vos règles sont calculées sur cette base</div>
       </div>
     </div>
+
+    <!-- Streak globale -->
+    <BudgetStreakCard
+      v-if="budgetStore.streak"
+      :streak="budgetStore.streak"
+    />
 
     <!-- Loader -->
     <LoadingSpinner v-if="budgetStore.loading" />
@@ -28,6 +40,7 @@
         v-for="rule in budgetStore.rules"
         :key="rule.id"
         :rule="rule"
+        :ruleStreak="rule.ruleStreak"
         @edit="openEditModal"
         @delete="handleDelete"
       />
@@ -128,7 +141,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useBudgetStore } from '@/stores/budgetStore'
 import { useCategoryStore } from '@/stores/categoryStore'
 import { useFormatters } from '@/composables/useFormatters'
@@ -137,10 +150,24 @@ import BaseModal from '@/components/base/BaseModal.vue'
 import LoadingSpinner from '@/components/base/LoadingSpinner.vue'
 import EmptyState from '@/components/base/EmptyState.vue'
 import BudgetRuleCard from '@/components/budget/BudgetRuleCard.vue'
+import BudgetMonthSelector from '@/components/budget/BudgetMonthSelector.vue'
+import BudgetStreakCard from '@/components/budget/BudgetStreakCard.vue'
 
 const budgetStore = useBudgetStore()
 const categoryStore = useCategoryStore()
 const { formatCurrency } = useFormatters()
+
+const selectedMonth = ref(budgetStore.selectedMonth)
+
+const formattedSelectedMonth = computed(() => {
+  const [year, month] = selectedMonth.value.split('-').map(Number)
+  const date = new Date(year, month - 1, 1)
+  return date.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+})
+
+const onMonthChange = async (month: string) => {
+  await budgetStore.setSelectedMonth(month)
+}
 
 const showModal = ref(false)
 const editingRule = ref<BudgetRule | null>(null)
@@ -216,6 +243,7 @@ onMounted(async () => {
   await Promise.all([
     budgetStore.fetchRules(),
     budgetStore.fetchMonthlyIncome(),
+    budgetStore.fetchStreak(),
     categoryStore.fetchCategories()
   ])
 })
@@ -255,7 +283,7 @@ onMounted(async () => {
   background: linear-gradient(135deg, #2563eb, #3b82f6);
   border-radius: var(--radius);
   color: white;
-  margin-bottom: 32px;
+  margin-bottom: 24px;
 }
 
 .income-icon {
@@ -266,6 +294,7 @@ onMounted(async () => {
   font-size: 14px;
   opacity: 0.9;
   margin-bottom: 4px;
+  text-transform: capitalize;
 }
 
 .income-value {

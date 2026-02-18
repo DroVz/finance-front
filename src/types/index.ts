@@ -29,6 +29,7 @@ export interface Category {
   name: string;
   color: string | null;
   parent: Category | null;
+  defaultCategory: boolean;
 }
 
 export interface CategoryDTO {
@@ -205,6 +206,7 @@ export interface BudgetRule {
   currentPercentage: number;
   difference: number;
   status: 'RESPECTED' | 'EXCEEDED';
+  ruleStreak: number;
   createdAt: string;
 }
 
@@ -214,4 +216,10 @@ export interface BudgetRuleDTO {
   ruleType: BudgetRuleType;
   percentage: number;
   categoryId?: number | null;
+}
+
+export interface BudgetStreak {
+  currentStreak: number;
+  bestStreak: number;
+  lastRespectedMonth: string | null;
 }

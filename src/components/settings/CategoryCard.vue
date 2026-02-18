@@ -7,8 +7,10 @@
         :style="{ background: category.color }"
       ></span>
       <div class="category-name">{{ category.name }}</div>
+      <span v-if="category.defaultCategory" class="badge-system">🔒 Système</span>
     </div>
     <button
+      v-if="!category.defaultCategory"
       class="btn-icon btn-icon-danger"
       @click="emit('delete', category.id)"
       title="Supprimer"
@@ -61,6 +63,15 @@ const emit = defineEmits<{
 .category-name {
   font-weight: 600;
   font-size: 15px;
+}
+
+.badge-system {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b7280;
+  background: #e5e7eb;
+  padding: 2px 8px;
+  border-radius: 10px;
 }
 
 .btn-icon {

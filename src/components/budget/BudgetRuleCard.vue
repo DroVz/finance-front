@@ -6,6 +6,7 @@
         <div class="rule-badges">
           <span class="badge badge-type">{{ ruleTypeLabel }}</span>
           <span class="badge" :class="statusClass">{{ statusLabel }}</span>
+          <span v-if="ruleStreak && ruleStreak > 0" class="badge badge-streak">🔥 {{ ruleStreak }} mois</span>
         </div>
       </div>
       <div class="rule-actions">
@@ -52,6 +53,7 @@ import type { BudgetRule } from '@/types'
 
 const props = defineProps<{
   rule: BudgetRule
+  ruleStreak?: number
 }>()
 
 const emit = defineEmits<{
@@ -201,6 +203,11 @@ const progressColorClass = computed(() =>
 .badge-danger {
   background: #fee2e2;
   color: #991b1b;
+}
+
+.badge-streak {
+  background: #fef3c7;
+  color: #92400e;
 }
 
 .rule-actions {

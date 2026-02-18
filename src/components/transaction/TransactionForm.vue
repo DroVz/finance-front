@@ -32,7 +32,8 @@
         class="form-select"
         required
       >
-        <option :value="null" disabled>Sélectionner une catégorie</option>
+        <option v-if="defaultCategoryId" :value="defaultCategoryId" disabled>Non attribué (par défaut)</option>
+        <option v-else :value="null" disabled>Sélectionner une catégorie</option>
         <option
           v-for="category in categories"
           :key="category.id"
@@ -86,6 +87,7 @@ const props = defineProps<{
   categories: Category[]
   accounts: Account[]
   loading: boolean
+  defaultCategoryId?: number | null
 }>()
 
 const emit = defineEmits<{

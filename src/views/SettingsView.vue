@@ -88,18 +88,18 @@
 
     <!-- Liste des catégories -->
     <div class="card">
-      <h3 class="section-title">Mes catégories ({{ categoryStore.categories.length }})</h3>
+      <h3 class="section-title">Mes catégories ({{ visibleCategories.length }})</h3>
 
-      <LoadingSpinner v-if="categoryStore.loading && categoryStore.categories.length === 0" />
+      <LoadingSpinner v-if="categoryStore.loading && visibleCategories.length === 0" />
 
       <EmptyState
-        v-else-if="categoryStore.categories.length === 0"
+        v-else-if="visibleCategories.length === 0"
         message="Aucune catégorie créée"
       />
 
       <div v-else class="categories-grid">
         <CategoryCard
-          v-for="category in categoryStore.categories"
+          v-for="category in visibleCategories"
           :key="category.id"
           :category="category"
           @delete="confirmDeleteCategory"
@@ -144,7 +144,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useAccountStore } from '@/stores/accountStore';
 import { useCategoryStore } from '@/stores/categoryStore';
 import type { AccountDTO, CategoryDTO, Account } from '@/types';
@@ -158,6 +158,8 @@ import ColorPicker from '@/components/base/ColorPicker.vue';
 
 const accountStore = useAccountStore();
 const categoryStore = useCategoryStore();
+
+const visibleCategories = computed(() => categoryStore.categories.filter(c => !c.defaultCategory));
 
 
 // Gestion des comptes
