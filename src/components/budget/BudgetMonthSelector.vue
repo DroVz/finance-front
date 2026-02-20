@@ -94,7 +94,7 @@ const nextMonth = () => {
   height: 36px;
   border-radius: 50%;
   border: 1px solid var(--border-color);
-  background: white;
+  background: var(--bg-card);
   font-size: 22px;
   line-height: 1;
   cursor: pointer;
@@ -106,7 +106,7 @@ const nextMonth = () => {
 }
 
 .nav-btn:hover:not(.nav-btn--disabled) {
-  background: var(--bg-light);
+  background: var(--bg-hover);
   border-color: var(--primary-color);
 }
 

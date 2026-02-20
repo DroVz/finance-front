@@ -343,10 +343,11 @@ const confirmDeleteCategory = async (id: number) => {
   display: flex;
   gap: 16px;
   padding: 20px;
-  background: #dbeafe;
+  background: var(--bg-info-tint);
   border-radius: var(--radius);
   border-left: 4px solid var(--primary-color);
   margin-top: 24px;
+  color: var(--text-info-tint);
 }
 
 .info-icon {
@@ -384,8 +385,8 @@ const confirmDeleteCategory = async (id: number) => {
 }
 
 .success-message {
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--bg-success-tint);
+  color: var(--text-success-tint);
   padding: 12px;
   border-radius: 8px;
   margin-top: 12px;

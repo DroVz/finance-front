@@ -10,8 +10,8 @@
         </div>
       </div>
       <div class="rule-actions">
-        <button class="btn-icon" @click="emit('edit', rule)" title="Modifier">✏️</button>
-        <button class="btn-icon btn-icon-danger" @click="emit('delete', rule.id)" title="Supprimer">🗑️</button>
+        <button class="btn-icon" @click="emit('edit', rule)" title="Modifier"><IconEdit :size="16" /></button>
+        <button class="btn-icon btn-icon-danger" @click="emit('delete', rule.id)" title="Supprimer"><IconTrash :size="16" /></button>
       </div>
     </div>
 
@@ -50,6 +50,8 @@
 import { computed } from 'vue'
 import { useFormatters } from '@/composables/useFormatters'
 import type { BudgetRule } from '@/types'
+import IconTrash from '@/components/base/IconTrash.vue'
+import IconEdit from '@/components/base/IconEdit.vue'
 
 const props = defineProps<{
   rule: BudgetRule
@@ -146,7 +148,7 @@ const progressColorClass = computed(() =>
 
 <style scoped>
 .rule-card {
-  background: white;
+  background: var(--bg-card);
   border-radius: var(--radius);
   padding: 24px;
   box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.08));
@@ -191,23 +193,23 @@ const progressColorClass = computed(() =>
 }
 
 .badge-type {
-  background: #e5e7eb;
-  color: #374151;
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .badge-success {
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--bg-success-tint);
+  color: var(--text-success-tint);
 }
 
 .badge-danger {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--bg-danger-tint);
+  color: var(--text-danger-tint);
 }
 
 .badge-streak {
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--bg-warning-tint);
+  color: var(--text-warning-tint);
 }
 
 .rule-actions {
@@ -220,14 +222,13 @@ const progressColorClass = computed(() =>
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 16px;
-  opacity: 0.5;
-  transition: opacity 0.2s;
+  color: var(--text-secondary);
+  transition: all 0.2s;
   border-radius: 4px;
 }
 
-.btn-icon:hover { opacity: 1; }
-.btn-icon-danger:hover { background: #fee2e2; }
+.btn-icon:hover { color: var(--primary-color); background: var(--bg-icon-hover); }
+.btn-icon-danger:hover { background: var(--bg-icon-danger-hover); color: var(--color-icon-danger-hover); }
 
 .rule-description {
   font-size: 14px;
@@ -265,7 +266,7 @@ const progressColorClass = computed(() =>
 .progress-bar {
   position: relative;
   height: 10px;
-  background: #e5e7eb;
+  background: var(--bg-hover);
   border-radius: 5px;
   overflow: visible;
 }

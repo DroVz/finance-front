@@ -10,8 +10,19 @@
           <h1>Finance Manager</h1>
         </div>
         <p class="tagline">Gérez vos finances personnelles</p>
+
+        <label
+          class="theme-toggle"
+          :title="isDark ? 'Passer en mode clair' : 'Passer en mode sombre'"
+        >
+          <span class="toggle-icon">☀️</span>
+          <span class="toggle-track" :class="{ active: isDark }" @click="toggleTheme">
+            <span class="toggle-thumb"></span>
+          </span>
+          <span class="toggle-icon">🌙</span>
+        </label>
       </div>
-      
+
       <nav class="nav">
         <RouterLink to="/ajouter" class="nav-link">
           <span class="nav-icon">➕</span>
@@ -43,18 +54,22 @@
 </template>
 
 <script setup lang="ts">
-import { RouterLink } from 'vue-router';
+import { RouterLink } from 'vue-router'
+import { useTheme } from '@/composables/useTheme'
+
+const { isDark, toggleTheme } = useTheme()
 </script>
 
 <style scoped>
 .header {
-  background: white;
+  background: var(--bg-card);
   border-bottom: 1px solid var(--border-color);
   padding: 16px 0;
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow);
+  transition: background-color 0.2s;
 }
 
 .header-content {
@@ -79,6 +94,54 @@ import { RouterLink } from 'vue-router';
 .tagline {
   font-size: 14px;
   color: var(--text-secondary);
+}
+
+/* Toggle slider */
+.theme-toggle {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.toggle-track {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background: var(--bg-hover);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  transition: background 0.25s, border-color 0.25s;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.toggle-track.active {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.25s;
+}
+
+.toggle-track.active .toggle-thumb {
+  transform: translateX(20px);
 }
 
 .nav {
@@ -110,10 +173,6 @@ import { RouterLink } from 'vue-router';
   color: white;
 }
 
-.nav-link.router-link-active .nav-icon {
-  filter: brightness(0) invert(1);
-}
-
 .nav-icon {
   font-size: 18px;
 }
@@ -123,12 +182,16 @@ import { RouterLink } from 'vue-router';
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
+  .theme-toggle {
+    margin-left: 0;
+  }
+
   .nav {
     overflow-x: auto;
     width: 100%;
   }
-  
+
   .nav-link {
     white-space: nowrap;
   }

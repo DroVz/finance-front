@@ -30,13 +30,13 @@ const formattedBalance = formatCurrency(props.account.currentBalance)
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  background: var(--bg-light);
+  background: var(--bg-item);
   border-radius: 8px;
   transition: background 0.2s;
 }
 
 .account-item:hover {
-  background: #e5e7eb;
+  background: var(--bg-hover);
 }
 
 .account-info {

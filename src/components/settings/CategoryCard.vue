@@ -15,13 +15,14 @@
       @click="emit('delete', category.id)"
       title="Supprimer"
     >
-      🗑️
+      <IconTrash :size="16" />
     </button>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { Category } from '@/types'
+import IconTrash from '@/components/base/IconTrash.vue'
 
 defineProps<{
   category: Category
@@ -38,13 +39,13 @@ const emit = defineEmits<{
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  background: var(--bg-light);
+  background: var(--bg-item);
   border-radius: 8px;
   transition: background 0.2s;
 }
 
 .category-card:hover {
-  background: #e5e7eb;
+  background: var(--bg-hover);
 }
 
 .category-info {
@@ -68,8 +69,8 @@ const emit = defineEmits<{
 .badge-system {
   font-size: 11px;
   font-weight: 600;
-  color: #6b7280;
-  background: #e5e7eb;
+  color: var(--text-secondary);
+  background: var(--bg-hover);
   padding: 2px 8px;
   border-radius: 10px;
 }
@@ -79,14 +80,13 @@ const emit = defineEmits<{
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 18px;
-  opacity: 0.5;
+  color: var(--text-secondary);
   transition: all 0.2s;
   border-radius: 4px;
 }
 
 .btn-icon:hover {
-  opacity: 1;
-  background: #fee2e2;
+  background: var(--bg-icon-danger-hover);
+  color: var(--color-icon-danger-hover);
 }
 </style>

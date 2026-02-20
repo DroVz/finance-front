@@ -79,7 +79,7 @@ const cashFlowMessage = computed(() => {
 }
 
 .stat-card {
-  background: white;
+  background: var(--bg-card);
   border-radius: var(--radius);
   padding: 20px;
   box-shadow: var(--shadow-sm);
@@ -121,43 +121,43 @@ const cashFlowMessage = computed(() => {
 
 /* Cash Flow - Couleurs dynamiques */
 .cash-flow.positive-high {
-  background: #d1fae5;
-  border-left: 4px solid #10b981;
+  background: var(--bg-success-tint);
+  border-left: 4px solid var(--success-color);
 }
 
 .cash-flow.positive-high .stat-value {
-  color: #047857;
+  color: var(--text-success-tint);
 }
 
 .cash-flow.positive {
-  background: #ecfdf5;
-  border-left: 4px solid #6ee7b7;
+  background: var(--bg-success-tint);
+  border-left: 4px solid var(--success-color);
 }
 
 .cash-flow.positive .stat-value {
-  color: #059669;
+  color: var(--text-success-tint);
 }
 
 .cash-flow.neutral {
-  background: #fef3c7;
-  border-left: 4px solid #f59e0b;
+  background: var(--bg-warning-tint);
+  border-left: 4px solid var(--warning-color);
 }
 
 .cash-flow.neutral .stat-value {
-  color: #d97706;
+  color: var(--text-warning-tint);
 }
 
 .cash-flow.negative {
-  background: #fee2e2;
-  border-left: 4px solid #ef4444;
+  background: var(--bg-danger-tint);
+  border-left: 4px solid var(--danger-color);
 }
 
 .cash-flow.negative .stat-value {
-  color: #dc2626;
+  color: var(--text-danger-tint);
 }
 
 .savings-rate .stat-value {
-  color: var(--primary);
+  color: var(--primary-color);
 }
 
 @media (max-width: 768px) {

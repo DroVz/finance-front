@@ -11,27 +11,89 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f5f5f7;
-  color: #1d1d1f;
+  background-color: var(--bg-light);
+  color: var(--text-primary);
+  transition: background-color 0.2s, color 0.2s;
 }
 
 #app {
   min-height: 100vh;
 }
 
-/* Variables CSS */
+/* Variables CSS — thème clair */
 :root {
+  color-scheme: light;
   --primary-color: #2563eb;
   --success-color: #10b981;
   --danger-color: #ef4444;
   --warning-color: #f59e0b;
+
   --bg-light: #f5f5f7;
+  --bg-card: #ffffff;
+  --bg-item: #f3f4f6;
+  --bg-hover: #e5e7eb;
+  --bg-input: #ffffff;
+  --bg-selected: #eff6ff;
+
   --border-color: #e5e7eb;
   --text-primary: #1d1d1f;
   --text-secondary: #6b7280;
+
   --radius: 12px;
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+
+  /* Semantic tint backgrounds */
+  --bg-info-tint: #dbeafe;
+  --bg-success-tint: #d1fae5;
+  --bg-danger-tint: #fee2e2;
+  --bg-warning-tint: #fef3c7;
+  --text-info-tint: #1e40af;
+  --text-success-tint: #065f46;
+  --text-danger-tint: #991b1b;
+  --text-warning-tint: #92400e;
+
+  /* Icon button hover */
+  --bg-icon-hover: rgba(0, 0, 0, 0.06);
+  --bg-icon-danger-hover: #fee2e2;
+  --color-icon-danger-hover: var(--danger-color);
+}
+
+/* Thème sombre */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg-light: #111827;
+  --bg-card: #1f2937;
+  --bg-item: #374151;
+  --bg-hover: #4b5563;
+  --bg-input: #111827;
+  --bg-selected: #1e3a5f;
+
+  --border-color: #374151;
+  --text-primary: #f9fafb;
+  --text-secondary: #9ca3af;
+
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.5);
+
+  /* Semantic tint backgrounds */
+  --bg-info-tint: #1e3a5f;
+  --bg-success-tint: #064e3b;
+  --bg-danger-tint: #450a0a;
+  --bg-warning-tint: #451a03;
+  --text-info-tint: #93c5fd;
+  --text-success-tint: #6ee7b7;
+  --text-danger-tint: #fca5a5;
+  --text-warning-tint: #fcd34d;
+
+  /* Icon button hover */
+  --bg-icon-hover: rgba(255, 255, 255, 0.1);
+  --bg-icon-danger-hover: rgba(239, 68, 68, 0.15);
+  --color-icon-danger-hover: #fca5a5;
 }
 
 /* Utilitaires */
@@ -42,7 +104,7 @@ body {
 }
 
 .card {
-  background: white;
+  background: var(--bg-card);
   border-radius: var(--radius);
   padding: 24px;
   box-shadow: var(--shadow);
@@ -56,6 +118,12 @@ body {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
+  background: var(--bg-item);
+  color: var(--text-primary);
+}
+
+.btn:not(.btn-primary):not(.btn-success):not(.btn-danger):hover {
+  background: var(--bg-hover);
 }
 
 .btn-primary {
@@ -112,7 +180,9 @@ body {
   border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 16px;
-  transition: border-color 0.2s;
+  background-color: var(--bg-input);
+  color: var(--text-primary);
+  transition: border-color 0.2s, background-color 0.2s;
 }
 
 .form-input:focus,
@@ -138,23 +208,23 @@ body {
 }
 
 .badge-income {
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--bg-success-tint);
+  color: var(--text-success-tint);
 }
 
 .badge-expense {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--bg-danger-tint);
+  color: var(--text-danger-tint);
 }
 
 .badge-transfer {
-  background: #dbeafe;
-  color: #1e40af;
+  background: var(--bg-info-tint);
+  color: var(--text-info-tint);
 }
 
 /* Animation de chargement */
 .spinner {
-  border: 3px solid #f3f4f6;
+  border: 3px solid var(--bg-hover);
   border-top: 3px solid var(--primary-color);
   border-radius: 50%;
   width: 40px;
@@ -170,11 +240,19 @@ body {
 
 /* Message d'erreur */
 .error-message {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--bg-danger-tint);
+  color: var(--text-danger-tint);
   padding: 12px;
   border-radius: 8px;
   margin-bottom: 20px;
+}
+
+.success-message {
+  background: var(--bg-success-tint);
+  color: var(--text-success-tint);
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 12px;
 }
 
 /* Responsive */

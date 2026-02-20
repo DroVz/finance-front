@@ -318,11 +318,11 @@ onMounted(async () => {
 
 /* Guide */
 .guide-card {
-  background: white;
+  background: var(--bg-card);
   border-radius: var(--radius);
   padding: 24px;
-  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.08));
-  border-left: 4px solid #eab308;
+  box-shadow: var(--shadow-sm);
+  border-left: 4px solid var(--warning-color);
 }
 
 .guide-title {

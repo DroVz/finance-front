@@ -69,9 +69,9 @@ onUnmounted(() => document.removeEventListener('click', onClickOutside))
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
-  border: 1px solid var(--border-color, #d1d5db);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  background: white;
+  background: var(--bg-card);
   cursor: pointer;
   font-family: inherit;
   transition: border-color 0.2s;
@@ -104,10 +104,10 @@ onUnmounted(() => document.removeEventListener('click', onClickOutside))
   grid-template-columns: repeat(5, 1fr);
   gap: 6px;
   padding: 10px;
-  background: white;
-  border: 1px solid var(--border-color, #d1d5db);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-lg);
   z-index: 10;
 }
 

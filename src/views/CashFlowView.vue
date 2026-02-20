@@ -217,7 +217,7 @@ onMounted(async () => {
 
 /* Filtres */
 .filters-card {
-  background: white;
+  background: var(--bg-card);
   border-radius: var(--radius);
   padding: 20px;
   box-shadow: var(--shadow-sm);
@@ -255,23 +255,24 @@ onMounted(async () => {
 .filter-select,
 .filter-input {
   padding: 10px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 14px;
   font-family: inherit;
+  background: var(--bg-input);
+  color: var(--text-primary);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .filter-select:focus,
 .filter-input:focus {
   outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
 .filter-select {
   cursor: pointer;
-  background: white;
 }
 
 /* Loader */
@@ -284,8 +285,8 @@ onMounted(async () => {
   display: inline-block;
   width: 50px;
   height: 50px;
-  border: 4px solid #f3f4f6;
-  border-top-color: var(--primary);
+  border: 4px solid var(--bg-hover);
+  border-top-color: var(--primary-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -304,11 +305,11 @@ onMounted(async () => {
 
 /* Erreur */
 .error-message {
-  background: #fee2e2;
-  color: #991b1b;
+  background: var(--bg-danger-tint);
+  color: var(--text-danger-tint);
   padding: 16px 20px;
   border-radius: var(--radius);
-  border: 1px solid #fecaca;
+  border: 1px solid var(--danger-color);
   text-align: center;
   font-weight: 500;
 }

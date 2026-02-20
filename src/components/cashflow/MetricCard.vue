@@ -27,7 +27,7 @@ defineProps<{
   gap: 16px;
   padding: 24px;
   border-radius: var(--radius);
-  background: white;
+  background: var(--bg-card);
   box-shadow: var(--shadow);
 }
 

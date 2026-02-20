@@ -34,6 +34,7 @@
 import { computed } from 'vue';
 import type { MonthlyCashFlow } from '@/types';
 import { useFormatters } from '@/composables/useFormatters';
+import { useTheme } from '@/composables/useTheme';
 
 const props = defineProps<{
   monthlyData: MonthlyCashFlow[]
@@ -52,6 +53,7 @@ const rangeOptions = [
 ];
 
 const { formatCurrency } = useFormatters();
+const { isDark } = useTheme();
 
 // Préparer les données pour le graphique
 const chartSeries = computed(() => [
@@ -64,6 +66,8 @@ const chartSeries = computed(() => [
 const chartOptions = computed(() => ({
   chart: {
     type: 'line',
+    background: 'transparent',
+    foreColor: isDark.value ? '#9ca3af' : '#6b7280',
     toolbar: {
       show: true,
       tools: {
@@ -89,7 +93,7 @@ const chartOptions = computed(() => ({
   },
   markers: {
     size: 6,
-    colors: ['#fff'],
+    colors: [isDark.value ? '#1f2937' : '#fff'],
     strokeColors: props.monthlyData.map(d => d.cashFlow >= 0 ? '#10b981' : '#ef4444'),
     strokeWidth: 3,
     hover: {
@@ -100,6 +104,7 @@ const chartOptions = computed(() => ({
     categories: props.monthlyData.map(d => d.monthLabel),
     labels: {
       style: {
+        colors: isDark.value ? '#9ca3af' : '#6b7280',
         fontSize: '12px',
         fontFamily: 'inherit'
       }
@@ -109,6 +114,7 @@ const chartOptions = computed(() => ({
     labels: {
       formatter: (value: number) => formatCurrency(value),
       style: {
+        colors: isDark.value ? '#9ca3af' : '#6b7280',
         fontSize: '12px',
         fontFamily: 'inherit'
       }
@@ -142,7 +148,7 @@ const chartOptions = computed(() => ({
     }
   },
   grid: {
-    borderColor: '#e5e7eb',
+    borderColor: isDark.value ? '#374151' : '#e5e7eb',
     strokeDashArray: 4
   },
   annotations: {
@@ -171,7 +177,7 @@ const chartOptions = computed(() => ({
 
 <style scoped>
 .cash-flow-chart {
-  background: white;
+  background: var(--bg-card);
   border-radius: var(--radius);
   padding: 24px;
   box-shadow: var(--shadow-sm);
@@ -201,9 +207,9 @@ const chartOptions = computed(() => ({
 
 .range-btn {
   padding: 6px 14px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
-  background: white;
+  background: var(--bg-card);
   font-size: 13px;
   font-family: inherit;
   color: var(--text-secondary);
@@ -247,7 +253,7 @@ const chartOptions = computed(() => ({
 <style>
 /* Styles globaux pour le tooltip ApexCharts */
 .apex-tooltip {
-  background: white;
+  background: #ffffff;
   border-radius: 8px;
   padding: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -313,5 +319,29 @@ const chartOptions = computed(() => ({
   padding: 4px;
   border-radius: 4px;
   background: #f3f4f6;
+}
+
+/* Dark mode overrides for tooltip */
+[data-theme="dark"] .apex-tooltip {
+  background: #1f2937;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .tooltip-title {
+  color: #f9fafb;
+  border-bottom-color: #374151;
+}
+
+[data-theme="dark"] .tooltip-label {
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .tooltip-divider {
+  background: #374151;
+}
+
+[data-theme="dark"] .tooltip-message {
+  background: #374151;
+  color: #d1d5db;
 }
 </style>

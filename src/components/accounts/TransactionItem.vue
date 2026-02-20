@@ -1,5 +1,16 @@
 <template>
-  <div class="transaction-item">
+  <div class="transaction-item" :class="{ selected }">
+    <!-- Checkbox multi-sélection (masqué pour les virements) -->
+    <input
+      v-if="!isTransfer"
+      type="checkbox"
+      class="transaction-checkbox"
+      :class="{ visible: selectionActive }"
+      :checked="selected"
+      @change="emit('toggle-select', transaction.id)"
+      @click.stop
+    />
+
     <div
       class="transaction-icon"
       :class="!transaction.categoryColor ? `icon-${transaction.type.toLowerCase()}` : ''"
@@ -25,13 +36,24 @@
       {{ formattedAmount }}
     </div>
 
-    <button
-      class="btn-delete"
-      @click="emit('delete', transaction.id)"
-      title="Supprimer"
-    >
-      🗑️
-    </button>
+    <div class="transaction-actions">
+      <button
+        v-if="!isTransfer"
+        class="btn-action"
+        title="Modifier"
+        @click="emit('edit', transaction)"
+      >
+        <IconEdit :size="16" />
+      </button>
+
+      <button
+        class="btn-action btn-action-danger"
+        title="Supprimer"
+        @click="emit('delete', transaction.id)"
+      >
+        <IconTrash :size="16" />
+      </button>
+    </div>
   </div>
 </template>
 
@@ -39,17 +61,24 @@
 import { computed } from 'vue'
 import { useFormatters } from '@/composables/useFormatters'
 import type { Transaction } from '@/types'
+import IconTrash from '@/components/base/IconTrash.vue'
+import IconEdit from '@/components/base/IconEdit.vue'
 
 const props = defineProps<{
   transaction: Transaction
+  selected?: boolean
+  selectionActive?: boolean
 }>()
 
 const emit = defineEmits<{
   delete: [id: number]
+  edit: [transaction: Transaction]
+  'toggle-select': [id: number]
 }>()
 
 const { formatDate, formatTransactionAmount, getTransactionIcon } = useFormatters()
 
+const isTransfer = computed(() => props.transaction.linkedTransactionId !== null)
 const icon = computed(() => getTransactionIcon(props.transaction.type))
 const formattedDate = computed(() => formatDate(props.transaction.transactionDate))
 const formattedAmount = computed(() => formatTransactionAmount(props.transaction))
@@ -61,14 +90,36 @@ const formattedAmount = computed(() => formatTransactionAmount(props.transaction
   align-items: center;
   gap: 16px;
   padding: 16px;
-  background: var(--bg-light);
+  background: var(--bg-item);
   border-radius: 8px;
   transition: all 0.2s;
 }
 
 .transaction-item:hover {
-  background: #e5e7eb;
+  background: var(--bg-hover);
   transform: translateY(-1px);
+}
+
+.transaction-item.selected {
+  background: var(--bg-selected);
+  outline: 2px solid #3b82f6;
+  outline-offset: -2px;
+}
+
+/* Checkbox */
+.transaction-checkbox {
+  opacity: 0;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+  accent-color: var(--primary-color);
+  transition: opacity 0.15s;
+}
+
+.transaction-checkbox.visible,
+.transaction-item:hover .transaction-checkbox {
+  opacity: 1;
 }
 
 .transaction-icon {
@@ -79,18 +130,19 @@ const formattedAmount = computed(() => formatTransactionAmount(props.transaction
   align-items: center;
   justify-content: center;
   border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .icon-income {
-  background: #d1fae5;
+  background: var(--bg-success-tint);
 }
 
 .icon-expense {
-  background: #fee2e2;
+  background: var(--bg-danger-tint);
 }
 
 .icon-transfer {
-  background: #dbeafe;
+  background: var(--bg-info-tint);
 }
 
 .transaction-info {
@@ -111,7 +163,7 @@ const formattedAmount = computed(() => formatTransactionAmount(props.transaction
 
 .transaction-account-badge {
   padding: 2px 8px;
-  background: white;
+  background: var(--bg-hover);
   border-radius: 4px;
   font-size: 12px;
   color: var(--text-secondary);
@@ -147,18 +199,36 @@ const formattedAmount = computed(() => formatTransactionAmount(props.transaction
   color: var(--primary-color);
 }
 
-.btn-delete {
+/* Actions (crayon + corbeille) */
+.transaction-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.transaction-item:hover .transaction-actions {
+  opacity: 1;
+}
+
+.btn-action {
   padding: 8px;
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 20px;
-  opacity: 0.5;
-  transition: opacity 0.2s;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+  border-radius: 6px;
 }
 
-.btn-delete:hover {
-  opacity: 1;
+.btn-action:hover {
+  color: var(--primary-color);
+  background: var(--bg-icon-hover);
+}
+
+.btn-action-danger:hover {
+  background: var(--bg-icon-danger-hover);
+  color: var(--color-icon-danger-hover);
 }
 
 @media (max-width: 768px) {
@@ -170,6 +240,10 @@ const formattedAmount = computed(() => formatTransactionAmount(props.transaction
     width: 100%;
     text-align: left;
     margin-top: 8px;
+  }
+
+  .transaction-actions {
+    opacity: 1;
   }
 }
 </style>

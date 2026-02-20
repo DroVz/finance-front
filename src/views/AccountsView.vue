@@ -73,10 +73,31 @@
           v-for="transaction in filteredTransactions"
           :key="transaction.id"
           :transaction="transaction"
+          :selected="selectedIds.has(transaction.id)"
+          :selection-active="selectionActive"
           @delete="deleteTransaction"
+          @edit="handleEdit"
+          @toggle-select="handleToggleSelect"
         />
       </div>
     </div>
+
+    <!-- Modale d'édition unitaire -->
+    <TransactionEditModal
+      :show="editingTransaction !== null"
+      :transaction="editingTransaction"
+      :categories="categoryStore.categories"
+      @close="editingTransaction = null"
+      @save="handleSave"
+    />
+
+    <!-- Barre d'actions multi-sélection -->
+    <TransactionBulkBar
+      :selected-count="selectedIds.size"
+      :categories="categoryStore.categories"
+      @bulk-category-change="handleBulkCategory"
+      @clear="selectedIds = new Set()"
+    />
   </div>
 </template>
 
@@ -87,13 +108,15 @@ import { useCategoryStore } from '@/stores/categoryStore';
 import { useTransactionStore } from '@/stores/transactionStore';
 import { dashboardService } from '@/services/dashboardService';
 import { useFormatters } from '@/composables/useFormatters';
-import type { DashboardStats, TransactionType } from '@/types';
+import type { DashboardStats, Transaction, TransactionDTO, TransactionType } from '@/types';
 import LoadingSpinner from '@/components/base/LoadingSpinner.vue';
 import EmptyState from '@/components/base/EmptyState.vue';
 import MetricCard from '@/components/cashflow/MetricCard.vue';
 import AccountItem from '@/components/accounts/AccountItem.vue';
 import TransactionFilters from '@/components/accounts/TransactionFilters.vue';
 import TransactionItem from '@/components/accounts/TransactionItem.vue';
+import TransactionEditModal from '@/components/accounts/TransactionEditModal.vue';
+import TransactionBulkBar from '@/components/accounts/TransactionBulkBar.vue';
 
 const { formatCurrency } = useFormatters();
 
@@ -107,6 +130,13 @@ const selectedType = ref<TransactionType | null>(null);
 const selectedCategoryId = ref<number | null>(null);
 const searchDescription = ref('');
 const stats = ref<DashboardStats | null>(null);
+
+// État sélection multi
+const selectedIds = ref<Set<number>>(new Set());
+const selectionActive = computed(() => selectedIds.value.size > 0);
+
+// État édition unitaire
+const editingTransaction = ref<Transaction | null>(null);
 
 const totalBalance = computed(() => accountStore.getTotalBalance());
 
@@ -166,6 +196,45 @@ const deleteTransaction = async (id: number) => {
     alert('Transaction supprimée avec succès');
   } catch (error: any) {
     alert(error.response?.data?.message || 'Erreur lors de la suppression');
+  }
+};
+
+// Gestion de la sélection multiple
+const handleToggleSelect = (id: number) => {
+  const next = new Set(selectedIds.value);
+  if (next.has(id)) {
+    next.delete(id);
+  } else {
+    next.add(id);
+  }
+  selectedIds.value = next;
+};
+
+// Ouvre la modale d'édition pour une transaction
+const handleEdit = (transaction: Transaction) => {
+  editingTransaction.value = transaction;
+};
+
+// Sauvegarde une transaction éditée
+const handleSave = async (dto: TransactionDTO) => {
+  if (!editingTransaction.value) return;
+  try {
+    await transactionStore.updateTransaction(editingTransaction.value.id, dto);
+    await accountStore.fetchAccounts();
+    editingTransaction.value = null;
+  } catch (error: any) {
+    alert(error.response?.data?.message || 'Erreur lors de la modification');
+  }
+};
+
+// Applique une catégorie en masse sur les transactions sélectionnées
+const handleBulkCategory = async (categoryId: number) => {
+  try {
+    await transactionStore.bulkUpdateCategory([...selectedIds.value], categoryId);
+    await accountStore.fetchAccounts();
+    selectedIds.value = new Set();
+  } catch (error: any) {
+    alert(error.response?.data?.message || 'Erreur lors de la mise à jour en masse');
   }
 };
 

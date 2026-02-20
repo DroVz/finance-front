@@ -45,7 +45,7 @@ const progressWidth = computed(() => {
 
 <style scoped>
 .streak-card {
-  background: white;
+  background: var(--bg-card);
   border-radius: var(--radius);
   padding: 20px 24px;
   box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.08));
@@ -101,7 +101,7 @@ const progressWidth = computed(() => {
 
 .streak-progress-bar {
   height: 6px;
-  background: #e5e7eb;
+  background: var(--bg-hover);
   border-radius: 3px;
   overflow: hidden;
   margin-bottom: 6px;
