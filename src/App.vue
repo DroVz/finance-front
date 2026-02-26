@@ -1,8 +1,8 @@
 <template>
   <div id="app">
-    <Header />
-    <main class="main-content">
-      <div class="container">
+    <Header v-if="!isLoginPage" />
+    <main class="main-content" :class="{ 'no-header': isLoginPage }">
+      <div class="container" :class="{ 'full-height': isLoginPage }">
         <RouterView />
       </div>
     </main>
@@ -10,25 +10,28 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
-import { RouterView } from 'vue-router';
+import { computed } from 'vue';
+import { RouterView, useRoute } from 'vue-router';
 import Header from '@/components/Header.vue';
-import { useAccountStore } from '@/stores/accountStore';
-import { useCategoryStore } from '@/stores/categoryStore';
 
-const accountStore = useAccountStore();
-const categoryStore = useCategoryStore();
-
-// Charge les données initiales au montage
-onMounted(() => {
-  accountStore.fetchAccounts();
-  categoryStore.fetchCategories();
-});
+const route = useRoute();
+const isLoginPage = computed(() => route.name === 'Login');
 </script>
 
 <style scoped>
 .main-content {
   padding: 24px 0;
   min-height: calc(100vh - 80px);
+}
+
+.main-content.no-header {
+  padding: 0;
+  min-height: 100vh;
+}
+
+.container.full-height {
+  height: 100%;
+  padding: 0;
+  max-width: 100%;
 }
 </style>

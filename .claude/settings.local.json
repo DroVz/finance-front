@@ -4,7 +4,12 @@
       "Bash(dir:*)",
       "Bash(mvn clean compile:*)",
       "Bash(mvn compile:*)",
-      "Read(//c/Users/Alex/Desktop/finance/**)"
+      "Read(//c/Users/Alex/Desktop/finance/**)",
+      "Bash(sshpass -p \"claudessh\" ssh -o StrictHostKeyChecking=no -p 1222 sshAlex@192.168.1.23 \"echo ''Connexion OK'' && whoami && uname -a\")",
+      "Bash(where:*)",
+      "Bash(ssh:*)",
+      "Bash(python:*)",
+      "Bash(pip install:*)"
     ]
   }
 }

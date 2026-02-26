@@ -21,6 +21,10 @@
           </span>
           <span class="toggle-icon">🌙</span>
         </label>
+
+        <button class="logout-btn" title="Se déconnecter" @click="handleLogout">
+          ⎋
+        </button>
       </div>
 
       <nav class="nav">
@@ -54,10 +58,18 @@
 </template>
 
 <script setup lang="ts">
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import { useTheme } from '@/composables/useTheme'
+import { useAuthStore } from '@/stores/authStore'
 
 const { isDark, toggleTheme } = useTheme()
+const authStore = useAuthStore()
+const router = useRouter()
+
+const handleLogout = async () => {
+  await authStore.logout()
+  router.push({ name: 'Login' })
+}
 </script>
 
 <style scoped>
@@ -94,6 +106,23 @@ const { isDark, toggleTheme } = useTheme()
 .tagline {
   font-size: 14px;
   color: var(--text-secondary);
+}
+
+.logout-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: var(--text-secondary);
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.logout-btn:hover {
+  background: var(--bg-icon-danger-hover);
+  color: var(--color-icon-danger-hover);
 }
 
 /* Toggle slider */
