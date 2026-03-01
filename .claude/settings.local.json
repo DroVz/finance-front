@@ -13,7 +13,18 @@
       "Bash(python3 -c \":*)",
       "WebFetch(domain:www.downforeveryoneorjustme.com)",
       "WebFetch(domain:deepwiki.com)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "Bash(./mvnw compile -q)",
+      "Bash(cmd /c \"mvn compile -q 2>&1\")",
+      "Bash(cmd /c \"cd C:\\\\Users\\\\Alex\\\\Desktop\\\\finance\\\\back\\\\finance-api && mvn compile 2>&1\")",
+      "Bash(cmd /c \"cd /d C:\\\\Users\\\\Alex\\\\Desktop\\\\finance\\\\back\\\\finance-api && mvn compile 2>&1 && echo BUILD_OK || echo BUILD_FAILED\")",
+      "Bash(powershell -Command \"Set-Location ''C:\\\\Users\\\\Alex\\\\Desktop\\\\finance\\\\back\\\\finance-api''; mvn compile 2>&1 | Out-String\")",
+      "Bash(powershell -Command \"& { $env:PATH += '';C:\\\\Program Files\\\\Eclipse Adoptium\\\\jdk-25.0.0.9-hotspot\\\\bin;C:\\\\ProgramData\\\\chocolatey\\\\bin;C:\\\\Program Files\\\\Maven\\\\apache-maven-3.9.9\\\\bin''; Set-Location ''C:\\\\Users\\\\Alex\\\\Desktop\\\\finance\\\\back\\\\finance-api''; mvn compile 2>&1 | Out-String }\")",
+      "Bash(\"/c/Users/Alex/AppData/Local/Programs/IntelliJ IDEA Community Edition/plugins/maven/lib/maven3/bin/mvn\" compile)",
+      "Bash(JAVA_HOME=\"/c/Users/Alex/.jdks/openjdk-25.0.2\" \"/c/Users/Alex/AppData/Local/Programs/IntelliJ IDEA Community Edition/plugins/maven/lib/maven3/bin/mvn\" compile)",
+      "Bash(JAVA_HOME=\"/c/Users/Alex/.jdks/openjdk-25.0.2\" \"/c/Users/Alex/AppData/Local/Programs/IntelliJ IDEA Community Edition/plugins/maven/lib/maven3/bin/mvn\" compile -q)",
+      "Bash(ls -la /c/Users/Alex/Desktop/finance/back/finance-api/src/main/java/com/financemanager/controller/*.java)",
+      "Bash(xargs basename -a)"
     ]
   }
 }

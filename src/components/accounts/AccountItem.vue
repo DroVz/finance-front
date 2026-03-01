@@ -12,6 +12,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useFormatters } from '@/composables/useFormatters'
 import type { Account } from '@/types'
 
@@ -21,7 +22,7 @@ const props = defineProps<{
 
 const { formatCurrency } = useFormatters()
 
-const formattedBalance = formatCurrency(props.account.currentBalance)
+const formattedBalance = computed(() => formatCurrency(props.account.currentBalance))
 </script>
 
 <style scoped>

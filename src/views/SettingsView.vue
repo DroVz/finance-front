@@ -189,7 +189,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useAccountStore } from '@/stores/accountStore';
 import { useCategoryStore } from '@/stores/categoryStore';
 import { profileService } from '@/services/profileService';
@@ -206,6 +206,13 @@ const accountStore = useAccountStore();
 const categoryStore = useCategoryStore();
 
 const visibleCategories = computed(() => categoryStore.categories.filter(c => !c.defaultCategory));
+
+onMounted(async () => {
+  await Promise.all([
+    accountStore.fetchAccounts(),
+    categoryStore.fetchCategories()
+  ]);
+});
 
 
 // Gestion des comptes

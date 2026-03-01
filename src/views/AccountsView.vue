@@ -240,7 +240,11 @@ const handleBulkCategory = async (categoryId: number) => {
 
 // Chargement initial
 onMounted(async () => {
-  await loadTransactions();
+  await Promise.all([
+    accountStore.fetchAccounts(),
+    categoryStore.fetchCategories(),
+    loadTransactions()
+  ]);
 
   try {
     stats.value = await dashboardService.getCurrentMonthStats();
