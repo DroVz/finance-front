@@ -107,6 +107,51 @@
       </div>
     </div>
 
+    <!-- Section changement de mot de passe -->
+    <div class="card">
+      <h3 class="section-title">Changer mon mot de passe</h3>
+      <form @submit.prevent="handleChangePassword" class="account-form">
+        <div class="form-group">
+          <label class="form-label">Mot de passe actuel</label>
+          <input
+            v-model="passwordForm.currentPassword"
+            type="password"
+            class="form-input"
+            required
+            autocomplete="current-password"
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nouveau mot de passe</label>
+          <input
+            v-model="passwordForm.newPassword"
+            type="password"
+            class="form-input"
+            required
+            minlength="8"
+            autocomplete="new-password"
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirmer le nouveau mot de passe</label>
+          <input
+            v-model="passwordForm.confirmPassword"
+            type="password"
+            class="form-input"
+            required
+            autocomplete="new-password"
+          />
+        </div>
+        <div v-if="passwordError" class="error-message">{{ passwordError }}</div>
+        <div v-if="passwordSuccess" class="success-message">{{ passwordSuccess }}</div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" :disabled="passwordLoading">
+            {{ passwordLoading ? 'Enregistrement...' : 'Changer le mot de passe' }}
+          </button>
+        </div>
+      </form>
+    </div>
+
     <!-- Modal d'édition de compte -->
     <BaseModal :show="showEditModal" @close="closeEditModal">
       <h3>Modifier le compte</h3>
@@ -147,6 +192,7 @@
 import { ref, computed } from 'vue';
 import { useAccountStore } from '@/stores/accountStore';
 import { useCategoryStore } from '@/stores/categoryStore';
+import { profileService } from '@/services/profileService';
 import type { AccountDTO, CategoryDTO, Account } from '@/types';
 import LoadingSpinner from '@/components/base/LoadingSpinner.vue';
 import EmptyState from '@/components/base/EmptyState.vue';
@@ -293,6 +339,37 @@ const confirmDeleteCategory = async (id: number) => {
     }, 3000);
   } catch (error: any) {
     categoryError.value = error.response?.data?.message || 'Erreur lors de la suppression';
+  }
+};
+
+// Changement de mot de passe
+const passwordForm = ref({ currentPassword: '', newPassword: '', confirmPassword: '' });
+const passwordError = ref<string | null>(null);
+const passwordSuccess = ref<string | null>(null);
+const passwordLoading = ref(false);
+
+const handleChangePassword = async () => {
+  passwordError.value = null;
+  passwordSuccess.value = null;
+
+  if (passwordForm.value.newPassword !== passwordForm.value.confirmPassword) {
+    passwordError.value = 'Les mots de passe ne correspondent pas';
+    return;
+  }
+
+  passwordLoading.value = true;
+  try {
+    await profileService.changePassword(passwordForm.value.currentPassword, passwordForm.value.newPassword);
+    passwordSuccess.value = 'Mot de passe modifié avec succès !';
+    passwordForm.value = { currentPassword: '', newPassword: '', confirmPassword: '' };
+
+    setTimeout(() => {
+      passwordSuccess.value = null;
+    }, 3000);
+  } catch (error: any) {
+    passwordError.value = error.response?.data?.message || 'Erreur lors du changement de mot de passe';
+  } finally {
+    passwordLoading.value = false;
   }
 };
 </script>

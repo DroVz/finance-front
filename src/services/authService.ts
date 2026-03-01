@@ -1,5 +1,10 @@
 import axios from 'axios';
 
+export interface AuthUser {
+  username: string;
+  role: string;
+}
+
 export const authService = {
   login: async (username: string, password: string): Promise<void> => {
     const params = new URLSearchParams();
@@ -14,12 +19,8 @@ export const authService = {
     await axios.post('/api/auth/logout');
   },
 
-  checkAuth: async (): Promise<boolean> => {
-    try {
-      await axios.get('/api/auth/me');
-      return true;
-    } catch {
-      return false;
-    }
+  getMe: async (): Promise<AuthUser> => {
+    const response = await axios.get<AuthUser>('/api/auth/me');
+    return response.data;
   }
 };

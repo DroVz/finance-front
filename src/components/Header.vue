@@ -52,6 +52,10 @@
           <span class="nav-icon">⚙️</span>
           Paramètres
         </RouterLink>
+        <RouterLink v-if="authStore.isAdmin()" to="/admin" class="nav-link nav-link-admin">
+          <span class="nav-icon">👥</span>
+          Admin
+        </RouterLink>
       </nav>
     </div>
   </header>

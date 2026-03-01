@@ -9,7 +9,11 @@
       "Bash(where:*)",
       "Bash(ssh:*)",
       "Bash(python:*)",
-      "Bash(pip install:*)"
+      "Bash(pip install:*)",
+      "Bash(python3 -c \":*)",
+      "WebFetch(domain:www.downforeveryoneorjustme.com)",
+      "WebFetch(domain:deepwiki.com)",
+      "WebFetch(domain:github.com)"
     ]
   }
 }

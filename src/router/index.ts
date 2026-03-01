@@ -43,6 +43,12 @@ const router = createRouter({
       path: '/objectifs',
       name: 'Objectifs',
       component: () => import('@/views/ObjectivesView.vue')
+    },
+    {
+      path: '/admin',
+      name: 'Admin',
+      component: () => import('@/views/AdminView.vue'),
+      meta: { requiresAdmin: true }
     }
   ]
 });
@@ -55,6 +61,10 @@ router.beforeEach(async (to) => {
 
   if (!authenticated) {
     return { name: 'Login' };
+  }
+
+  if (to.meta.requiresAdmin && !authStore.isAdmin()) {
+    return { name: 'Ajouter' };
   }
 });
 

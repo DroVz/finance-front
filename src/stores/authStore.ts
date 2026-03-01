@@ -5,16 +5,29 @@ import { authService } from '@/services/authService';
 export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = ref(false);
   const checked = ref(false);
+  const username = ref<string>('');
+  const role = ref<string>('');
 
   const checkAuth = async (): Promise<boolean> => {
     if (checked.value) return isAuthenticated.value;
-    isAuthenticated.value = await authService.checkAuth();
+    try {
+      const user = await authService.getMe();
+      username.value = user.username;
+      role.value = user.role;
+      isAuthenticated.value = true;
+    } catch {
+      isAuthenticated.value = false;
+    }
     checked.value = true;
     return isAuthenticated.value;
   };
 
-  const login = async (username: string, password: string): Promise<void> => {
-    await authService.login(username, password);
+  const login = async (loginUsername: string, password: string): Promise<void> => {
+    await authService.login(loginUsername, password);
+    // Récupérer le rôle après login
+    const user = await authService.getMe();
+    username.value = user.username;
+    role.value = user.role;
     isAuthenticated.value = true;
     checked.value = true;
   };
@@ -23,7 +36,11 @@ export const useAuthStore = defineStore('auth', () => {
     await authService.logout();
     isAuthenticated.value = false;
     checked.value = false;
+    username.value = '';
+    role.value = '';
   };
 
-  return { isAuthenticated, checkAuth, login, logout };
+  const isAdmin = () => role.value === 'ROLE_ADMIN';
+
+  return { isAuthenticated, checked, username, role, checkAuth, login, logout, isAdmin };
 });
