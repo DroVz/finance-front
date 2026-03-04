@@ -28,6 +28,10 @@
       </div>
 
       <nav class="nav">
+        <RouterLink to="/accueil" class="nav-link">
+          <span class="nav-icon">🏠</span>
+          Accueil
+        </RouterLink>
         <RouterLink to="/ajouter" class="nav-link">
           <span class="nav-icon">➕</span>
           Ajouter

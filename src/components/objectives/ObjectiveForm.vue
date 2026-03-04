@@ -352,16 +352,10 @@ const handleSubmit = async () => {
       name: formData.value.name.trim()
     });
 
-    // Notification succès
-    alert(`✅ Objectif "${objective.name}" créé avec succès !\n\n🎯 Objectif : ${formatCurrency(objective.targetAmount)}\n${objective.targetDate ? `📅 Échéance : ${formatDate(objective.targetDate)}` : '💡 Épargnez à votre rythme !'}`);
-
-    // Fermer le modal et rediriger
     emit('close');
-
-    // Recharger les objectifs
     await objectiveStore.fetchObjectives();
-  } catch (error: any) {
-    alert(error.response?.data?.message || "Erreur lors de la création de l'objectif");
+  } catch {
+    // erreur disponible dans objectiveStore.error
   } finally {
     submitting.value = false;
   }

@@ -12,7 +12,12 @@ const router = createRouter({
     },
     {
       path: '/',
-      redirect: '/ajouter'
+      redirect: '/accueil'
+    },
+    {
+      path: '/accueil',
+      name: 'Accueil',
+      component: () => import('@/views/HomeView.vue')
     },
     {
       path: '/ajouter',
@@ -64,7 +69,7 @@ router.beforeEach(async (to) => {
   }
 
   if (to.meta.requiresAdmin && !authStore.isAdmin()) {
-    return { name: 'Ajouter' };
+    return { name: 'Accueil' };
   }
 });
 

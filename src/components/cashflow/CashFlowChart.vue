@@ -39,6 +39,7 @@ import { useTheme } from '@/composables/useTheme';
 const props = defineProps<{
   monthlyData: MonthlyCashFlow[]
   chartMonths: number
+  selectedMonth?: string  // format YYYY-MM
 }>();
 
 const emit = defineEmits<{
@@ -54,6 +55,13 @@ const rangeOptions = [
 
 const { formatCurrency } = useFormatters();
 const { isDark } = useTheme();
+
+// Index du mois sélectionné dans les données du graphique
+const selectedIndex = computed(() => {
+  if (!props.selectedMonth) return -1;
+  const [year, month] = props.selectedMonth.split('-').map(Number);
+  return props.monthlyData.findIndex(d => d.year === year && d.month === month);
+});
 
 // Préparer les données pour le graphique
 const chartSeries = computed(() => [
@@ -92,10 +100,12 @@ const chartOptions = computed(() => ({
     width: 4
   },
   markers: {
-    size: 6,
+    size: props.monthlyData.map((_, i) => i === selectedIndex.value ? 10 : 6),
     colors: [isDark.value ? '#1f2937' : '#fff'],
-    strokeColors: props.monthlyData.map(d => d.cashFlow >= 0 ? '#10b981' : '#ef4444'),
-    strokeWidth: 3,
+    strokeColors: props.monthlyData.map((d, i) =>
+      i === selectedIndex.value ? '#2563eb' : (d.cashFlow >= 0 ? '#10b981' : '#ef4444')
+    ),
+    strokeWidth: props.monthlyData.map((_, i) => i === selectedIndex.value ? 4 : 3),
     hover: {
       size: 8
     }

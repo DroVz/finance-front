@@ -1,7 +1,5 @@
 <template>
   <div class="cash-flow-summary">
-    <h3 class="section-title">Résumé de la période</h3>
-
     <div class="stats-grid">
       <!-- Revenus -->
       <div class="stat-card income">
@@ -63,13 +61,6 @@ const cashFlowMessage = computed(() => {
 <style scoped>
 .cash-flow-summary {
   margin-bottom: 32px;
-}
-
-.section-title {
-  font-size: 20px;
-  font-weight: 600;
-  margin-bottom: 16px;
-  color: var(--text-primary);
 }
 
 .stats-grid {

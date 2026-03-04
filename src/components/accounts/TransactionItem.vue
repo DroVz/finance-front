@@ -1,13 +1,12 @@
 <template>
   <div class="transaction-item" :class="{ selected }">
-    <!-- Checkbox multi-sélection (masqué pour les virements) -->
+    <!-- Checkbox multi-sélection (invisible pour les virements, mais garde l'espace) -->
     <input
-      v-if="!isTransfer"
       type="checkbox"
       class="transaction-checkbox"
-      :class="{ visible: selectionActive }"
+      :class="{ visible: selectionActive && !isTransfer, 'sr-hidden': isTransfer }"
       :checked="selected"
-      @change="emit('toggle-select', transaction.id)"
+      @change="!isTransfer && emit('toggle-select', transaction.id)"
       @click.stop
     />
 
@@ -38,8 +37,8 @@
 
     <div class="transaction-actions">
       <button
-        v-if="!isTransfer"
         class="btn-action"
+        :style="isTransfer ? { visibility: 'hidden', pointerEvents: 'none' } : {}"
         title="Modifier"
         @click="emit('edit', transaction)"
       >
@@ -118,8 +117,13 @@ const formattedAmount = computed(() => formatTransactionAmount(props.transaction
 }
 
 .transaction-checkbox.visible,
-.transaction-item:hover .transaction-checkbox {
+.transaction-item:hover .transaction-checkbox:not(.sr-hidden) {
   opacity: 1;
+}
+
+.transaction-checkbox.sr-hidden {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .transaction-icon {
@@ -203,12 +207,6 @@ const formattedAmount = computed(() => formatTransactionAmount(props.transaction
 .transaction-actions {
   display: flex;
   gap: 4px;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.transaction-item:hover .transaction-actions {
-  opacity: 1;
 }
 
 .btn-action {
@@ -242,8 +240,5 @@ const formattedAmount = computed(() => formatTransactionAmount(props.transaction
     margin-top: 8px;
   }
 
-  .transaction-actions {
-    opacity: 1;
-  }
 }
 </style>

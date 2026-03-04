@@ -1,7 +1,5 @@
 <template>
   <div class="accounts-view">
-    <h2 class="page-title">Vue d'ensemble des comptes</h2>
-
     <!-- KPI Cards -->
     <div class="kpi-cards">
       <MetricCard
@@ -98,6 +96,14 @@
       @bulk-category-change="handleBulkCategory"
       @clear="selectedIds = new Set()"
     />
+
+    <ConfirmModal
+      :show="pendingDeleteTransactionId !== null"
+      title="Supprimer cette transaction ?"
+      message="Cette action est irréversible."
+      @confirm="doDeleteTransaction"
+      @cancel="pendingDeleteTransactionId = null"
+    />
   </div>
 </template>
 
@@ -110,6 +116,7 @@ import { dashboardService } from '@/services/dashboardService';
 import { useFormatters } from '@/composables/useFormatters';
 import type { DashboardStats, Transaction, TransactionDTO, TransactionType } from '@/types';
 import LoadingSpinner from '@/components/base/LoadingSpinner.vue';
+import ConfirmModal from '@/components/base/ConfirmModal.vue';
 import EmptyState from '@/components/base/EmptyState.vue';
 import MetricCard from '@/components/cashflow/MetricCard.vue';
 import AccountItem from '@/components/accounts/AccountItem.vue';
@@ -185,17 +192,21 @@ const loadTransactions = async () => {
 };
 
 // Supprime une transaction
-const deleteTransaction = async (id: number) => {
-  if (!confirm('Êtes-vous sûr de vouloir supprimer cette transaction ?')) {
-    return;
-  }
+const pendingDeleteTransactionId = ref<number | null>(null);
 
+const deleteTransaction = (id: number) => {
+  pendingDeleteTransactionId.value = id;
+};
+
+const doDeleteTransaction = async () => {
+  if (pendingDeleteTransactionId.value === null) return;
   try {
-    await transactionStore.deleteTransaction(id);
-    await accountStore.fetchAccounts(); // Recharge les soldes
-    alert('Transaction supprimée avec succès');
-  } catch (error: any) {
-    alert(error.response?.data?.message || 'Erreur lors de la suppression');
+    await transactionStore.deleteTransaction(pendingDeleteTransactionId.value);
+    await accountStore.fetchAccounts();
+  } catch {
+    // erreur disponible dans transactionStore.error
+  } finally {
+    pendingDeleteTransactionId.value = null;
   }
 };
 
@@ -222,8 +233,8 @@ const handleSave = async (dto: TransactionDTO) => {
     await transactionStore.updateTransaction(editingTransaction.value.id, dto);
     await accountStore.fetchAccounts();
     editingTransaction.value = null;
-  } catch (error: any) {
-    alert(error.response?.data?.message || 'Erreur lors de la modification');
+  } catch {
+    // erreur disponible dans transactionStore.error
   }
 };
 
@@ -233,8 +244,8 @@ const handleBulkCategory = async (categoryId: number) => {
     await transactionStore.bulkUpdateCategory([...selectedIds.value], categoryId);
     await accountStore.fetchAccounts();
     selectedIds.value = new Set();
-  } catch (error: any) {
-    alert(error.response?.data?.message || 'Erreur lors de la mise à jour en masse');
+  } catch {
+    // erreur disponible dans transactionStore.error
   }
 };
 
@@ -260,11 +271,6 @@ onMounted(async () => {
   margin: 0 auto;
 }
 
-.page-title {
-  font-size: 32px;
-  font-weight: 600;
-  margin-bottom: 24px;
-}
 
 .kpi-cards {
   display: grid;

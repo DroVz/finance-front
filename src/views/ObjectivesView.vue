@@ -1,7 +1,5 @@
 <template>
   <div class="objectives-view">
-    <h2 class="page-title">Mes objectifs d'épargne</h2>
-
     <div class="objectives-header">
       <button class="btn btn-primary" @click="showCreateForm = true">
         ➕ Créer un objectif
@@ -50,6 +48,14 @@
     <BaseModal :show="showCreateForm" @close="showCreateForm = false">
       <ObjectiveForm @close="handleFormClose" />
     </BaseModal>
+
+    <ConfirmModal
+      :show="pendingDeleteObjectiveId !== null"
+      title="Supprimer cet objectif ?"
+      message="Cet objectif d'épargne sera définitivement supprimé."
+      @confirm="doDeleteObjective"
+      @cancel="pendingDeleteObjectiveId = null"
+    />
   </div>
 </template>
 
@@ -58,6 +64,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useObjectiveStore } from '@/stores/objectiveStore';
 import LoadingSpinner from '@/components/base/LoadingSpinner.vue';
 import EmptyState from '@/components/base/EmptyState.vue';
+import ConfirmModal from '@/components/base/ConfirmModal.vue';
 import BaseModal from '@/components/base/BaseModal.vue';
 import ObjectiveCard from '@/components/objectives/ObjectiveCard.vue';
 import ObjectiveForm from '@/components/objectives/ObjectiveForm.vue';
@@ -70,14 +77,20 @@ const activeCount = computed(() => objectiveStore.activeCount);
 const activeObjectives = computed(() => objectiveStore.activeObjectives);
 const completedObjectives = computed(() => objectiveStore.completedObjectives);
 
-const handleDelete = async (id: number) => {
-  if (confirm('Êtes-vous sûr de vouloir supprimer cet objectif ?')) {
-    try {
-      await objectiveStore.deleteObjective(id);
-      alert('Objectif supprimé avec succès');
-    } catch (error: any) {
-      alert(error.response?.data?.message || 'Erreur lors de la suppression');
-    }
+const pendingDeleteObjectiveId = ref<number | null>(null);
+
+const handleDelete = (id: number) => {
+  pendingDeleteObjectiveId.value = id;
+};
+
+const doDeleteObjective = async () => {
+  if (pendingDeleteObjectiveId.value === null) return;
+  try {
+    await objectiveStore.deleteObjective(pendingDeleteObjectiveId.value);
+  } catch {
+    // erreur disponible dans objectiveStore.error
+  } finally {
+    pendingDeleteObjectiveId.value = null;
   }
 };
 
@@ -98,12 +111,6 @@ onMounted(async () => {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-}
-
-.page-title {
-  font-size: 32px;
-  font-weight: 600;
-  margin-bottom: 24px;
 }
 
 .objectives-header {
@@ -167,10 +174,6 @@ onMounted(async () => {
 @media (max-width: 768px) {
   .objectives-view {
     padding: 16px;
-  }
-
-  .page-title {
-    font-size: 24px;
   }
 
   .objectives-header {

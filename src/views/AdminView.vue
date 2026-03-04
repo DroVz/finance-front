@@ -1,7 +1,5 @@
 <template>
   <div class="admin-view">
-    <h2 class="page-title">Administration des utilisateurs</h2>
-
     <!-- Formulaire de création -->
     <div class="card">
       <h3 class="section-title">Créer un utilisateur</h3>
@@ -86,6 +84,16 @@
 
       <div v-if="deleteError" class="error-message">{{ deleteError }}</div>
     </div>
+
+    <!-- Modal de confirmation suppression utilisateur -->
+    <ConfirmModal
+      :show="pendingDeleteUser !== null"
+      title="Supprimer cet utilisateur ?"
+      :message="pendingDeleteUser ? `L'utilisateur « ${pendingDeleteUser.username} » et toutes ses données seront définitivement supprimés.` : ''"
+      confirm-label="Supprimer"
+      @confirm="doDeleteUser"
+      @cancel="pendingDeleteUser = null"
+    />
   </div>
 </template>
 
@@ -95,6 +103,7 @@ import { adminService, type AppUserDTO } from '@/services/adminService';
 import { useAuthStore } from '@/stores/authStore';
 import LoadingSpinner from '@/components/base/LoadingSpinner.vue';
 import EmptyState from '@/components/base/EmptyState.vue';
+import ConfirmModal from '@/components/base/ConfirmModal.vue';
 
 const authStore = useAuthStore();
 
@@ -140,17 +149,22 @@ const handleCreateUser = async () => {
   }
 };
 
-const handleDeleteUser = async (user: AppUserDTO) => {
-  if (!confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur "${user.username}" ? Toutes ses données seront perdues.`)) {
-    return;
-  }
+const pendingDeleteUser = ref<AppUserDTO | null>(null);
 
+const handleDeleteUser = (user: AppUserDTO) => {
+  pendingDeleteUser.value = user;
+};
+
+const doDeleteUser = async () => {
+  if (!pendingDeleteUser.value) return;
   deleteError.value = null;
   try {
-    await adminService.deleteUser(user.id);
+    await adminService.deleteUser(pendingDeleteUser.value.id);
     await loadUsers();
   } catch (error: any) {
     deleteError.value = error.response?.data?.message || 'Erreur lors de la suppression';
+  } finally {
+    pendingDeleteUser.value = null;
   }
 };
 
@@ -174,12 +188,6 @@ onMounted(loadUsers);
 
 .admin-view > .card {
   margin-bottom: 20px;
-}
-
-.page-title {
-  font-size: 32px;
-  font-weight: 600;
-  margin-bottom: 24px;
 }
 
 .section-title {

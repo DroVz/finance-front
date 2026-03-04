@@ -1,7 +1,5 @@
 <template>
   <div class="settings-view">
-    <h2 class="page-title">Gestion des comptes</h2>
-
     <!-- Formulaire d'ajout de compte -->
     <div class="card">
       <h3 class="section-title">Ajouter un nouveau compte</h3>
@@ -152,6 +150,24 @@
       </form>
     </div>
 
+    <!-- Modal de confirmation suppression compte -->
+    <ConfirmModal
+      :show="pendingDeleteAccountId !== null"
+      title="Supprimer ce compte ?"
+      message="Cette action est irréversible. Toutes les transactions associées seront également supprimées."
+      @confirm="doDeleteAccount"
+      @cancel="pendingDeleteAccountId = null"
+    />
+
+    <!-- Modal de confirmation suppression catégorie -->
+    <ConfirmModal
+      :show="pendingDeleteCategoryId !== null"
+      title="Supprimer cette catégorie ?"
+      message="Les transactions associées à cette catégorie seront réaffectées à « Non attribué »."
+      @confirm="doDeleteCategory"
+      @cancel="pendingDeleteCategoryId = null"
+    />
+
     <!-- Modal d'édition de compte -->
     <BaseModal :show="showEditModal" @close="closeEditModal">
       <h3>Modifier le compte</h3>
@@ -197,6 +213,7 @@ import type { AccountDTO, CategoryDTO, Account } from '@/types';
 import LoadingSpinner from '@/components/base/LoadingSpinner.vue';
 import EmptyState from '@/components/base/EmptyState.vue';
 import BaseModal from '@/components/base/BaseModal.vue';
+import ConfirmModal from '@/components/base/ConfirmModal.vue';
 import AccountCard from '@/components/settings/AccountCard.vue';
 import CategoryCard from '@/components/settings/CategoryCard.vue';
 import IconPicker from '@/components/base/IconPicker.vue';
@@ -288,20 +305,20 @@ const closeEditModal = () => {
   editingAccount.value = { name: '', initialBalance: 0, currency: 'EUR', icon: '💳' };
 };
 
-const confirmDeleteAccount = async (id: number) => {
-  if (!confirm('Êtes-vous sûr de vouloir supprimer ce compte ? Cette action est irréversible.')) {
-    return;
-  }
+const pendingDeleteAccountId = ref<number | null>(null);
 
+const confirmDeleteAccount = (id: number) => {
+  pendingDeleteAccountId.value = id;
+};
+
+const doDeleteAccount = async () => {
+  if (pendingDeleteAccountId.value === null) return;
   try {
-    await accountStore.deleteAccount(id);
-    accountSuccess.value = 'Compte supprimé avec succès !';
-
-    setTimeout(() => {
-      accountSuccess.value = null;
-    }, 3000);
+    await accountStore.deleteAccount(pendingDeleteAccountId.value);
   } catch (error: any) {
     accountError.value = error.response?.data?.message || 'Erreur lors de la suppression';
+  } finally {
+    pendingDeleteAccountId.value = null;
   }
 };
 
@@ -332,20 +349,20 @@ const handleCreateCategory = async () => {
   }
 };
 
-const confirmDeleteCategory = async (id: number) => {
-  if (!confirm('Êtes-vous sûr de vouloir supprimer cette catégorie ?')) {
-    return;
-  }
+const pendingDeleteCategoryId = ref<number | null>(null);
 
+const confirmDeleteCategory = (id: number) => {
+  pendingDeleteCategoryId.value = id;
+};
+
+const doDeleteCategory = async () => {
+  if (pendingDeleteCategoryId.value === null) return;
   try {
-    await categoryStore.deleteCategory(id);
-    categorySuccess.value = 'Catégorie supprimée avec succès !';
-
-    setTimeout(() => {
-      categorySuccess.value = null;
-    }, 3000);
+    await categoryStore.deleteCategory(pendingDeleteCategoryId.value);
   } catch (error: any) {
     categoryError.value = error.response?.data?.message || 'Erreur lors de la suppression';
+  } finally {
+    pendingDeleteCategoryId.value = null;
   }
 };
 
@@ -390,12 +407,6 @@ const handleChangePassword = async () => {
 .settings-view > .card,
 .settings-view > .info-box {
   margin-bottom: 20px;
-}
-
-.page-title {
-  font-size: 32px;
-  font-weight: 600;
-  margin-bottom: 24px;
 }
 
 .section-title {

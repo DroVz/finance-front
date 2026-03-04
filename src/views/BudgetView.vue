@@ -137,6 +137,14 @@
         </div>
       </form>
     </BaseModal>
+
+    <ConfirmModal
+      :show="pendingDeleteRuleId !== null"
+      title="Supprimer cette règle ?"
+      message="Cette règle budgétaire sera définitivement supprimée."
+      @confirm="doDeleteRule"
+      @cancel="pendingDeleteRuleId = null"
+    />
   </div>
 </template>
 
@@ -148,6 +156,7 @@ import { useFormatters } from '@/composables/useFormatters'
 import type { BudgetRule, BudgetRuleDTO, BudgetRuleType } from '@/types'
 import BaseModal from '@/components/base/BaseModal.vue'
 import LoadingSpinner from '@/components/base/LoadingSpinner.vue'
+import ConfirmModal from '@/components/base/ConfirmModal.vue'
 import EmptyState from '@/components/base/EmptyState.vue'
 import BudgetRuleCard from '@/components/budget/BudgetRuleCard.vue'
 import BudgetMonthSelector from '@/components/budget/BudgetMonthSelector.vue'
@@ -223,21 +232,29 @@ const handleSubmit = async () => {
       await budgetStore.createRule(formData.value)
     }
     closeModal()
-  } catch (error: any) {
-    alert(error.response?.data?.message || 'Erreur lors de la sauvegarde')
+  } catch {
+    // erreur disponible dans budgetStore.error
   } finally {
     submitting.value = false
   }
 }
 
-const handleDelete = async (id: number) => {
-  if (!confirm('Supprimer cette règle budgétaire ?')) return
+const pendingDeleteRuleId = ref<number | null>(null);
+
+const handleDelete = (id: number) => {
+  pendingDeleteRuleId.value = id;
+};
+
+const doDeleteRule = async () => {
+  if (pendingDeleteRuleId.value === null) return;
   try {
-    await budgetStore.deleteRule(id)
-  } catch (error: any) {
-    alert(error.response?.data?.message || 'Erreur lors de la suppression')
+    await budgetStore.deleteRule(pendingDeleteRuleId.value);
+  } catch {
+    // erreur disponible dans budgetStore.error
+  } finally {
+    pendingDeleteRuleId.value = null;
   }
-}
+};
 
 onMounted(async () => {
   await Promise.all([
