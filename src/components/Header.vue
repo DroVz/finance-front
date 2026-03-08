@@ -32,9 +32,9 @@
           <span class="nav-icon">🏠</span>
           Accueil
         </RouterLink>
-        <RouterLink to="/ajouter" class="nav-link">
-          <span class="nav-icon">➕</span>
-          Ajouter
+        <RouterLink to="/transactions" class="nav-link">
+          <span class="nav-icon">📋</span>
+          Transactions
         </RouterLink>
         <RouterLink to="/comptes" class="nav-link">
           <span class="nav-icon">💳</span>

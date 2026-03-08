@@ -8,14 +8,12 @@
         :value="formatCurrency(totalBalance)"
         variant="primary"
       />
-
       <MetricCard
         icon="📈"
         label="Revenus ce mois"
         :value="formatCurrency(stats?.totalIncome || 0)"
         variant="success"
       />
-
       <MetricCard
         icon="📉"
         label="Dépenses ce mois"
@@ -24,365 +22,220 @@
       />
     </div>
 
-    <!-- Soldes par compte -->
+    <!-- Formulaire d'ajout de compte -->
     <div class="card">
-      <h3 class="section-title">Soldes par compte</h3>
-      <div class="accounts-list">
-        <AccountItem
-          v-for="account in accountStore.accounts"
+      <h3 class="section-title">Ajouter un compte</h3>
+      <form @submit.prevent="handleCreateAccount" class="account-form">
+        <div class="form-row">
+          <IconPicker v-model="newAccount.icon" />
+          <input
+            v-model="newAccount.name"
+            type="text"
+            class="form-input"
+            placeholder="Nom du compte (ex: Livret A)"
+            required
+          />
+          <input
+            v-model.number="newAccount.initialBalance"
+            type="number"
+            step="0.01"
+            class="form-input form-input-balance"
+            placeholder="Solde initial"
+          />
+          <button type="submit" class="btn btn-primary" :disabled="accountStore.loading">
+            ➕ Ajouter
+          </button>
+        </div>
+      </form>
+      <div v-if="accountError" class="error-message">{{ accountError }}</div>
+      <div v-if="accountSuccess" class="success-message">{{ accountSuccess }}</div>
+    </div>
+
+    <!-- Liste des comptes (drag & drop, edit, delete) -->
+    <div class="card">
+      <h3 class="section-title">Mes comptes ({{ accountStore.accounts.length }})</h3>
+
+      <LoadingSpinner v-if="accountStore.loading && accountStore.accounts.length === 0" />
+      <EmptyState v-else-if="accountStore.accounts.length === 0" message="Aucun compte créé" />
+
+      <div v-else class="drag-list">
+        <AccountCard
+          v-for="(account, index) in accountStore.accounts"
           :key="account.id"
           :account="account"
-          :active="selectedAccountId === account.id"
-          @select="handleAccountSelect"
-        />
-
-        <EmptyState
-          v-if="accountStore.accounts.length === 0"
-          message="Aucun compte. Créez-en un dans les Paramètres."
+          draggable="true"
+          :class="{ 'drag-over': dragOverIndex === index, 'dragging': dragIndex === index }"
+          @edit="editAccount"
+          @delete="confirmDeleteAccount"
+          @dragstart="onDragStart(index, $event)"
+          @dragover.prevent="onDragOver(index)"
+          @drop.prevent="onDrop(index)"
+          @dragend="onDragEnd"
         />
       </div>
     </div>
 
-    <!-- Filtres -->
-    <div class="card">
-      <h3 class="section-title">Filtres</h3>
-      <TransactionFilters
-        v-model:selected-account-id="selectedAccountId"
-        v-model:selected-type="selectedType"
-        v-model:selected-category-id="selectedCategoryId"
-        v-model:search-description="searchDescription"
-        :accounts="accountStore.accounts"
-        :categories="categoryStore.categories"
-        @account-change="loadTransactions"
-      />
-    </div>
-
-    <!-- Historique des transactions -->
-    <div class="card" ref="transactionsCard">
-      <div class="transactions-header">
-        <h3 class="section-title">Historique des transactions</h3>
-        <span v-if="filteredTransactions.length > 0" class="tx-count">
-          {{ filteredTransactions.length }} transaction{{ filteredTransactions.length > 1 ? 's' : '' }}
-        </span>
-      </div>
-
-      <LoadingSpinner v-if="loading" />
-
-      <EmptyState
-        v-else-if="filteredTransactions.length === 0"
-        message="Aucune transaction trouvée."
-      />
-
-      <template v-else>
-        <div class="transactions-list">
-          <TransactionItem
-            v-for="transaction in paginatedTransactions"
-            :key="transaction.id"
-            :transaction="transaction"
-            :selected="selectedIds.has(transaction.id)"
-            :selection-active="selectionActive"
-            @delete="deleteTransaction"
-            @edit="handleEdit"
-            @toggle-select="handleToggleSelect"
-          />
+    <!-- Modal édition compte -->
+    <BaseModal :show="showEditModal" @close="closeEditModal">
+      <h3>Modifier le compte</h3>
+      <form @submit.prevent="handleUpdateAccount">
+        <div class="form-group">
+          <label class="form-label">Icône</label>
+          <IconPicker v-model="editingAccount.icon" />
         </div>
-
-        <!-- Pagination -->
-        <div v-if="totalPages > 1" class="pagination" ref="paginationBar">
-          <button
-            class="page-btn"
-            :disabled="currentPage === 1"
-            @click="goToPage(1)"
-            title="Première page"
-          >«</button>
-          <button
-            class="page-btn"
-            :disabled="currentPage === 1"
-            @click="goToPage(currentPage - 1)"
-            title="Page précédente"
-          >‹</button>
-
-          <template v-for="p in pageNumbers" :key="p">
-            <span v-if="p === '…'" class="page-ellipsis">…</span>
-            <button
-              v-else
-              class="page-btn"
-              :class="{ 'page-active': p === currentPage }"
-              @click="goToPage(p as number)"
-            >{{ p }}</button>
-          </template>
-
-          <button
-            class="page-btn"
-            :disabled="currentPage === totalPages"
-            @click="goToPage(currentPage + 1)"
-            title="Page suivante"
-          >›</button>
-          <button
-            class="page-btn"
-            :disabled="currentPage === totalPages"
-            @click="goToPage(totalPages)"
-            title="Dernière page"
-          >»</button>
+        <div class="form-group">
+          <label class="form-label">Nom du compte</label>
+          <input v-model="editingAccount.name" type="text" class="form-input" required />
         </div>
-      </template>
-    </div>
-
-    <!-- Modale d'édition unitaire -->
-    <TransactionEditModal
-      :show="editingTransaction !== null"
-      :transaction="editingTransaction"
-      :categories="categoryStore.categories"
-      @close="editingTransaction = null"
-      @save="handleSave"
-    />
-
-    <!-- Barre d'actions multi-sélection -->
-    <TransactionBulkBar
-      :selected-count="selectedIds.size"
-      :categories="categoryStore.categories"
-      @bulk-category-change="handleBulkCategory"
-      @clear="selectedIds = new Set()"
-    />
+        <div class="form-group">
+          <label class="form-label">Solde initial</label>
+          <input v-model.number="editingAccount.initialBalance" type="number" step="0.01" class="form-input" required />
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn" @click="closeEditModal">Annuler</button>
+          <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </div>
+      </form>
+    </BaseModal>
 
     <ConfirmModal
-      :show="pendingDeleteTransactionId !== null"
-      title="Supprimer cette transaction ?"
-      message="Cette action est irréversible."
-      @confirm="doDeleteTransaction"
-      @cancel="pendingDeleteTransactionId = null"
+      :show="pendingDeleteAccountId !== null"
+      title="Supprimer ce compte ?"
+      message="Cette action est irréversible. Toutes les transactions associées seront également supprimées."
+      @confirm="doDeleteAccount"
+      @cancel="pendingDeleteAccountId = null"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, nextTick } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useAccountStore } from '@/stores/accountStore';
 import { useCategoryStore } from '@/stores/categoryStore';
-import { useTransactionStore } from '@/stores/transactionStore';
 import { dashboardService } from '@/services/dashboardService';
 import { useFormatters } from '@/composables/useFormatters';
-import type { DashboardStats, Transaction, TransactionDTO, TransactionType } from '@/types';
+import type { AccountDTO, DashboardStats, Account } from '@/types';
 import LoadingSpinner from '@/components/base/LoadingSpinner.vue';
-import ConfirmModal from '@/components/base/ConfirmModal.vue';
 import EmptyState from '@/components/base/EmptyState.vue';
+import BaseModal from '@/components/base/BaseModal.vue';
+import ConfirmModal from '@/components/base/ConfirmModal.vue';
 import MetricCard from '@/components/cashflow/MetricCard.vue';
-import AccountItem from '@/components/accounts/AccountItem.vue';
-import TransactionFilters from '@/components/accounts/TransactionFilters.vue';
-import TransactionItem from '@/components/accounts/TransactionItem.vue';
-import TransactionEditModal from '@/components/accounts/TransactionEditModal.vue';
-import TransactionBulkBar from '@/components/accounts/TransactionBulkBar.vue';
+import AccountCard from '@/components/settings/AccountCard.vue';
+import IconPicker from '@/components/base/IconPicker.vue';
 
 const { formatCurrency } = useFormatters();
 
 const accountStore = useAccountStore();
 const categoryStore = useCategoryStore();
-const transactionStore = useTransactionStore();
 
-const loading = ref(false);
-const selectedAccountId = ref<number | null>(null);
-const transactionsCard = ref<HTMLElement | null>(null);
-const selectedType = ref<TransactionType | null>(null);
-const selectedCategoryId = ref<number | null>(null);
-const searchDescription = ref('');
 const stats = ref<DashboardStats | null>(null);
-
-// État sélection multi
-const selectedIds = ref<Set<number>>(new Set());
-const selectionActive = computed(() => selectedIds.value.size > 0);
-
-// État édition unitaire
-const editingTransaction = ref<Transaction | null>(null);
-
-// Pagination
-const PAGE_SIZE = 20;
-const currentPage = ref(1);
-const paginationBar = ref<HTMLElement | null>(null);
-
-const goToPage = (page: number) => {
-  const paginationViewportTop = paginationBar.value?.getBoundingClientRect().top ?? 0;
-  const scrollYBefore = window.scrollY;
-  currentPage.value = page;
-  nextTick(() => {
-    const newPaginationViewportTop = paginationBar.value?.getBoundingClientRect().top ?? paginationViewportTop;
-    const delta = newPaginationViewportTop - paginationViewportTop;
-    window.scrollTo({ top: Math.max(0, scrollYBefore + delta) });
-  });
-};
-
 const totalBalance = computed(() => accountStore.getTotalBalance());
 
-const filteredTransactions = computed(() => {
-  let transactions = transactionStore.transactions;
+// --- Drag & drop ---
+const dragIndex = ref<number | null>(null);
+const dragOverIndex = ref<number | null>(null);
 
-  // Filtre par type avec gestion spéciale pour les virements
-  if (selectedType.value) {
-    if (selectedType.value === 'TRANSFER') {
-      // Les virements sont identifiés par linkedTransactionId non null
-      transactions = transactions.filter(t => t.linkedTransactionId !== null);
-    } else {
-      // Pour INCOME et EXPENSE, filtre normal par type
-      transactions = transactions.filter(t => t.type === selectedType.value);
-    }
-  }
-
-  // Filtre par catégorie
-  if (selectedCategoryId.value) {
-    transactions = transactions.filter(t => t.categoryId === selectedCategoryId.value);
-  }
-
-  // Filtre par description
-  if (searchDescription.value.trim()) {
-    const search = searchDescription.value.trim().toLowerCase();
-    transactions = transactions.filter(t =>
-      t.description?.toLowerCase().includes(search)
-    );
-  }
-
-  return transactions;
-});
-
-const totalPages = computed(() => Math.max(1, Math.ceil(filteredTransactions.value.length / PAGE_SIZE)));
-
-const paginatedTransactions = computed(() => {
-  const start = (currentPage.value - 1) * PAGE_SIZE;
-  return filteredTransactions.value.slice(start, start + PAGE_SIZE);
-});
-
-const pageNumbers = computed(() => {
-  const total = totalPages.value;
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
-  const current = currentPage.value;
-  const pages: (number | '…')[] = [1];
-  if (current > 3) pages.push('…');
-  for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) pages.push(i);
-  if (current < total - 2) pages.push('…');
-  pages.push(total);
-  return pages;
-});
-
-// Reset page + sélection quand les filtres changent
-watch(filteredTransactions, () => {
-  currentPage.value = 1;
-  selectedIds.value = new Set();
-});
-
-const smoothScrollTo = (target: number, duration = 600) => {
-  const start = window.scrollY;
-  const distance = target - start;
-  const startTime = performance.now();
-  const easeInOutCubic = (t: number) =>
-    t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
-  const step = (now: number) => {
-    const elapsed = now - startTime;
-    const progress = Math.min(elapsed / duration, 1);
-    window.scrollTo(0, start + distance * easeInOutCubic(progress));
-    if (progress < 1) requestAnimationFrame(step);
-  };
-  requestAnimationFrame(step);
+const onDragStart = (index: number, event: DragEvent) => {
+  dragIndex.value = index;
+  if (event.dataTransfer) event.dataTransfer.effectAllowed = 'move';
 };
 
-// Clic sur une carte compte → filtre + scroll
-const handleAccountSelect = async (id: number) => {
-  if (selectedAccountId.value === id) {
-    selectedAccountId.value = null;
-  } else {
-    selectedAccountId.value = id;
+const onDragOver = (index: number) => {
+  if (dragIndex.value !== null && dragIndex.value !== index) {
+    dragOverIndex.value = index;
   }
-  await loadTransactions();
-  nextTick(() => {
-    if (!transactionsCard.value) return;
-    const headerHeight = document.querySelector('header')?.offsetHeight ?? 0;
-    const top = transactionsCard.value.getBoundingClientRect().top + window.scrollY - headerHeight;
-    smoothScrollTo(top);
-  });
 };
 
-// Charge les transactions
-const loadTransactions = async () => {
-  loading.value = true;
+const onDrop = async (targetIndex: number) => {
+  if (dragIndex.value === null || dragIndex.value === targetIndex) return;
+  const accounts = [...accountStore.accounts];
+  const [moved] = accounts.splice(dragIndex.value, 1);
+  accounts.splice(targetIndex, 0, moved);
+  accountStore.accounts = accounts;
+  dragIndex.value = null;
+  dragOverIndex.value = null;
+  await accountStore.reorderAccounts(accounts.map(a => a.id));
+};
+
+const onDragEnd = () => {
+  dragIndex.value = null;
+  dragOverIndex.value = null;
+};
+
+// --- Création compte ---
+const newAccount = ref<AccountDTO>({ name: '', initialBalance: 0, currency: 'EUR', icon: '💳' });
+const accountError = ref<string | null>(null);
+const accountSuccess = ref<string | null>(null);
+
+const handleCreateAccount = async () => {
+  accountError.value = null;
+  accountSuccess.value = null;
   try {
-    if (selectedAccountId.value) {
-      await transactionStore.fetchByAccount(selectedAccountId.value);
-    } else {
-      await transactionStore.fetchTransactions();
-    }
+    await accountStore.createAccount(newAccount.value);
+    accountSuccess.value = 'Compte créé avec succès !';
+    newAccount.value = { name: '', initialBalance: 0, currency: 'EUR', icon: '💳' };
+    setTimeout(() => { accountSuccess.value = null; }, 3000);
+  } catch (error: any) {
+    accountError.value = error.response?.data?.message || 'Erreur lors de la création du compte';
+  }
+};
+
+// --- Edition compte ---
+const showEditModal = ref(false);
+const editingAccount = ref<AccountDTO & { id?: number }>({ name: '', initialBalance: 0, currency: 'EUR', icon: '💳' });
+
+const editAccount = (account: Account) => {
+  editingAccount.value = { id: account.id, name: account.name, initialBalance: account.initialBalance, currency: account.currency, icon: account.icon || '💳' };
+  showEditModal.value = true;
+};
+
+const handleUpdateAccount = async () => {
+  if (!editingAccount.value.id) return;
+  try {
+    await accountStore.updateAccount(editingAccount.value.id, {
+      name: editingAccount.value.name,
+      initialBalance: editingAccount.value.initialBalance,
+      currency: editingAccount.value.currency,
+      icon: editingAccount.value.icon
+    });
+    closeEditModal();
+    accountSuccess.value = 'Compte modifié avec succès !';
+    setTimeout(() => { accountSuccess.value = null; }, 3000);
+  } catch (error: any) {
+    accountError.value = error.response?.data?.message || 'Erreur lors de la modification';
+  }
+};
+
+const closeEditModal = () => {
+  showEditModal.value = false;
+  editingAccount.value = { name: '', initialBalance: 0, currency: 'EUR', icon: '💳' };
+};
+
+// --- Suppression compte ---
+const pendingDeleteAccountId = ref<number | null>(null);
+
+const confirmDeleteAccount = (id: number) => { pendingDeleteAccountId.value = id; };
+
+const doDeleteAccount = async () => {
+  if (pendingDeleteAccountId.value === null) return;
+  try {
+    await accountStore.deleteAccount(pendingDeleteAccountId.value);
+  } catch (error: any) {
+    accountError.value = error.response?.data?.message || 'Erreur lors de la suppression';
   } finally {
-    loading.value = false;
+    pendingDeleteAccountId.value = null;
   }
 };
 
-// Supprime une transaction
-const pendingDeleteTransactionId = ref<number | null>(null);
-
-const deleteTransaction = (id: number) => {
-  pendingDeleteTransactionId.value = id;
-};
-
-const doDeleteTransaction = async () => {
-  if (pendingDeleteTransactionId.value === null) return;
-  try {
-    await transactionStore.deleteTransaction(pendingDeleteTransactionId.value);
-    await accountStore.fetchAccounts();
-  } catch {
-    // erreur disponible dans transactionStore.error
-  } finally {
-    pendingDeleteTransactionId.value = null;
-  }
-};
-
-// Gestion de la sélection multiple
-const handleToggleSelect = (id: number) => {
-  const next = new Set(selectedIds.value);
-  if (next.has(id)) {
-    next.delete(id);
-  } else {
-    next.add(id);
-  }
-  selectedIds.value = next;
-};
-
-// Ouvre la modale d'édition pour une transaction
-const handleEdit = (transaction: Transaction) => {
-  editingTransaction.value = transaction;
-};
-
-// Sauvegarde une transaction éditée
-const handleSave = async (dto: TransactionDTO) => {
-  if (!editingTransaction.value) return;
-  try {
-    await transactionStore.updateTransaction(editingTransaction.value.id, dto);
-    await accountStore.fetchAccounts();
-    editingTransaction.value = null;
-  } catch {
-    // erreur disponible dans transactionStore.error
-  }
-};
-
-// Applique une catégorie en masse sur les transactions sélectionnées
-const handleBulkCategory = async (categoryId: number) => {
-  try {
-    await transactionStore.bulkUpdateCategory([...selectedIds.value], categoryId);
-    await accountStore.fetchAccounts();
-    selectedIds.value = new Set();
-  } catch {
-    // erreur disponible dans transactionStore.error
-  }
-};
-
-// Chargement initial
+// --- Init ---
 onMounted(async () => {
   await Promise.all([
     accountStore.fetchAccounts(),
-    categoryStore.fetchCategories(),
-    loadTransactions()
+    categoryStore.fetchCategories()
   ]);
-
   try {
     stats.value = await dashboardService.getCurrentMonthStats();
-  } catch (error) {
-    console.error('Erreur lors du chargement des stats:', error);
-  }
+  } catch {}
 });
 </script>
 
@@ -390,14 +243,15 @@ onMounted(async () => {
 .accounts-view {
   max-width: 1200px;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
-
 
 .kpi-cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 20px;
-  margin-bottom: 32px;
 }
 
 .section-title {
@@ -406,90 +260,72 @@ onMounted(async () => {
   margin-bottom: 20px;
 }
 
-.accounts-list {
+.account-form {
+  margin-bottom: 8px;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.form-row .form-input {
+  flex: 1;
+}
+
+.form-input-balance {
+  max-width: 160px;
+  flex: 0 0 auto !important;
+}
+
+.drag-list {
   display: flex;
   flex-direction: column;
+  gap: 16px;
+}
+
+.drag-list :deep(.dragging) {
+  opacity: 0.4;
+}
+
+.drag-list :deep(.drag-over) {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
+}
+
+.modal-actions {
+  display: flex;
   gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
 }
 
-.transactions-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
+.error-message {
+  background: var(--bg-danger-tint, #fee2e2);
+  color: var(--danger-color, #dc2626);
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 12px;
 }
 
-.transactions-header .section-title {
-  margin-bottom: 0;
+.success-message {
+  background: var(--bg-success-tint, #d1fae5);
+  color: var(--text-success-tint, #065f46);
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 12px;
 }
 
-.tx-count {
-  font-size: 13px;
-  color: var(--text-secondary);
-  font-weight: 500;
-}
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
 
-.transactions-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* Pagination */
-.pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border-color);
-}
-
-.page-btn {
-  min-width: 36px;
-  height: 36px;
-  padding: 0 8px;
-  border: 1px solid var(--border-color);
-  background: var(--bg-card);
-  color: var(--text-primary);
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.page-btn:hover:not(:disabled) {
-  background: var(--bg-hover);
-  border-color: var(--primary-color);
-  color: var(--primary-color);
-}
-
-.page-btn:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
-
-.page-btn.page-active {
-  background: var(--primary-color);
-  border-color: var(--primary-color);
-  color: white;
-  font-weight: 600;
-}
-
-.page-ellipsis {
-  width: 36px;
-  text-align: center;
-  color: var(--text-secondary);
-  font-size: 14px;
-  line-height: 36px;
-}
-
-.accounts-view > .card {
-  margin-bottom: 20px;
-}
-
-.accounts-view > .card:last-child {
-  margin-bottom: 0;
+  .form-input-balance {
+    max-width: 100%;
+    flex: 1 !important;
+  }
 }
 </style>

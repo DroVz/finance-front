@@ -44,6 +44,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   changeRange: [months: number]
+  selectMonth: [month: string]
 }>();
 
 const rangeOptions = [
@@ -76,6 +77,14 @@ const chartOptions = computed(() => ({
     type: 'line',
     background: 'transparent',
     foreColor: isDark.value ? '#9ca3af' : '#6b7280',
+    events: {
+      markerClick: (_event: any, _ctx: any, config: any) => {
+        const data = props.monthlyData[config.dataPointIndex];
+        if (data) {
+          emit('selectMonth', `${data.year}-${String(data.month).padStart(2, '0')}`);
+        }
+      }
+    },
     toolbar: {
       show: true,
       tools: {
@@ -107,7 +116,8 @@ const chartOptions = computed(() => ({
     ),
     strokeWidth: props.monthlyData.map((_, i) => i === selectedIndex.value ? 4 : 3),
     hover: {
-      size: 8
+      size: 8,
+      cursor: 'pointer'
     }
   },
   xaxis: {

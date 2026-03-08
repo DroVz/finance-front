@@ -253,7 +253,7 @@ const checklistSteps = computed<ChecklistStep[]>(() => [
     id: 'accounts',
     label: 'Créer votre premier compte',
     description: 'Ajoutez un compte bancaire pour commencer',
-    link: '/parametres',
+    link: '/comptes',
     done: accountStore.accounts.length > 0
   },
   {
@@ -267,7 +267,7 @@ const checklistSteps = computed<ChecklistStep[]>(() => [
     id: 'transactions',
     label: 'Ajouter vos premières transactions',
     description: 'Saisissez ou importez vos relevés bancaires',
-    link: '/ajouter',
+    link: '/transactions',
     done: accountStore.accounts.some(a => a.transactionCount > 0)
   },
   {

@@ -21,8 +21,12 @@ const router = createRouter({
     },
     {
       path: '/ajouter',
-      name: 'Ajouter',
-      component: () => import('@/views/AddTransactionView.vue')
+      redirect: '/transactions'
+    },
+    {
+      path: '/transactions',
+      name: 'Transactions',
+      component: () => import('@/views/TransactionsView.vue')
     },
     {
       path: '/comptes',

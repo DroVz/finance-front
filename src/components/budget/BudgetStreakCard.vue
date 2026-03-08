@@ -47,7 +47,7 @@ const progressWidth = computed(() => {
 .streak-card {
   background: var(--bg-card);
   border-radius: var(--radius);
-  padding: 20px 24px;
+  padding: 12px 20px;
   box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.08));
   margin-bottom: 24px;
   border-left: 4px solid var(--border-color);
@@ -61,30 +61,30 @@ const progressWidth = computed(() => {
 .streak-main {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 12px;
+  gap: 12px;
+  margin-bottom: 8px;
 }
 
 .streak-icon {
-  font-size: 36px;
+  font-size: 24px;
   line-height: 1;
 }
 
 .streak-count {
   display: flex;
   align-items: baseline;
-  gap: 6px;
+  gap: 4px;
 }
 
 .streak-number {
-  font-size: 36px;
+  font-size: 22px;
   font-weight: 700;
   color: var(--success-color);
   line-height: 1;
 }
 
 .streak-unit {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-secondary);
 }

@@ -15,7 +15,7 @@
       ⚠️ {{ errorStats }}
     </div>
     <template v-else-if="stats">
-      <CashFlowSummary :stats="stats" />
+      <CashFlowSummary :stats="stats" :class="{ 'soft-loading': updatingStats }" />
     </template>
     <div v-else class="empty-state">
       <p>📊 Aucune donnée disponible pour {{ formattedMonth }}</p>
@@ -31,13 +31,14 @@
       :chart-months="chartMonths"
       :selected-month="selectedMonth"
       @change-range="changeChartRange"
+      @select-month="onSelectMonth"
     />
 
     <!-- Breakdown par type (CHARGES / LOISIRS / REVENUS) -->
-    <TypeBreakdown v-if="stats && !loadingStats" :stats="stats" />
+    <TypeBreakdown v-if="stats" :stats="stats" :class="{ 'soft-loading': updatingStats }" />
 
     <!-- Breakdown catégories du mois sélectionné -->
-    <CategoryBreakdown v-if="stats && !loadingStats" :stats="stats" />
+    <CategoryBreakdown v-if="stats" :stats="stats" :class="{ 'soft-loading': updatingStats }" />
   </div>
 </template>
 
@@ -54,7 +55,8 @@ const cashFlowStore = useCashFlowStore();
 
 const chartMonths = ref(12);
 const loadingChart = ref(true);
-const loadingStats = ref(true);
+const loadingStats = ref(true);   // premier chargement uniquement — masque le contenu
+const updatingStats = ref(false); // changements de mois — opacité légère, pas de masquage
 const errorStats = ref<string | null>(null);
 
 const getCurrentMonth = (): string => {
@@ -82,8 +84,12 @@ const monthToDates = (month: string): { start: string; end: string } => {
   };
 };
 
-const loadStats = async () => {
-  loadingStats.value = true;
+const loadStats = async (soft = false) => {
+  if (soft) {
+    updatingStats.value = true;
+  } else {
+    loadingStats.value = true;
+  }
   errorStats.value = null;
   try {
     const { start, end } = monthToDates(selectedMonth.value);
@@ -92,6 +98,7 @@ const loadStats = async () => {
     errorStats.value = e.response?.data?.message || 'Erreur lors du chargement des statistiques';
   } finally {
     loadingStats.value = false;
+    updatingStats.value = false;
   }
 };
 
@@ -105,8 +112,12 @@ const loadChart = async () => {
 };
 
 const onMonthChange = async () => {
-  await loadStats();
-  // le chart ne recharge pas — le marker se met à jour via computed réactif
+  await loadStats(true);
+};
+
+const onSelectMonth = async (month: string) => {
+  selectedMonth.value = month;
+  await loadStats(true);
 };
 
 const changeChartRange = async (months: number) => {
@@ -127,6 +138,16 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+.cash-flow-view :deep(.month-selector) {
+  margin-bottom: 0;
+}
+
+.soft-loading {
+  opacity: 0.45;
+  pointer-events: none;
+  transition: opacity 0.2s;
 }
 
 .subtitle {

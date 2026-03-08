@@ -295,8 +295,8 @@ onMounted(async () => {
 .income-card {
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 24px;
+  gap: 12px;
+  padding: 12px 20px;
   background: linear-gradient(135deg, #2563eb, #3b82f6);
   border-radius: var(--radius);
   color: white;
@@ -304,25 +304,26 @@ onMounted(async () => {
 }
 
 .income-icon {
-  font-size: 36px;
+  font-size: 22px;
 }
 
 .income-label {
-  font-size: 14px;
-  opacity: 0.9;
-  margin-bottom: 4px;
+  font-size: 12px;
+  opacity: 0.85;
+  margin-bottom: 1px;
   text-transform: capitalize;
 }
 
 .income-value {
-  font-size: 28px;
+  font-size: 20px;
   font-weight: 700;
+  line-height: 1.2;
 }
 
 .income-hint {
-  font-size: 13px;
+  font-size: 11px;
   opacity: 0.7;
-  margin-top: 2px;
+  margin-top: 1px;
 }
 
 /* Liste des règles */
