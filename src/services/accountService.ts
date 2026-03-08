@@ -41,5 +41,10 @@ export const accountService = {
   // Supprime un compte
   delete: async (id: number): Promise<void> => {
     await api.delete(`/accounts/${id}`);
+  },
+
+  // Réordonne les comptes
+  reorder: async (orderedIds: number[]): Promise<void> => {
+    await api.put('/accounts/reorder', orderedIds);
   }
 };

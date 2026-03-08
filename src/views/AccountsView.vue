@@ -32,6 +32,8 @@
           v-for="account in accountStore.accounts"
           :key="account.id"
           :account="account"
+          :active="selectedAccountId === account.id"
+          @select="handleAccountSelect"
         />
 
         <EmptyState
@@ -56,8 +58,13 @@
     </div>
 
     <!-- Historique des transactions -->
-    <div class="card">
-      <h3 class="section-title">Historique des transactions</h3>
+    <div class="card" ref="transactionsCard">
+      <div class="transactions-header">
+        <h3 class="section-title">Historique des transactions</h3>
+        <span v-if="filteredTransactions.length > 0" class="tx-count">
+          {{ filteredTransactions.length }} transaction{{ filteredTransactions.length > 1 ? 's' : '' }}
+        </span>
+      </div>
 
       <LoadingSpinner v-if="loading" />
 
@@ -66,18 +73,59 @@
         message="Aucune transaction trouvée."
       />
 
-      <div v-else class="transactions-list">
-        <TransactionItem
-          v-for="transaction in filteredTransactions"
-          :key="transaction.id"
-          :transaction="transaction"
-          :selected="selectedIds.has(transaction.id)"
-          :selection-active="selectionActive"
-          @delete="deleteTransaction"
-          @edit="handleEdit"
-          @toggle-select="handleToggleSelect"
-        />
-      </div>
+      <template v-else>
+        <div class="transactions-list">
+          <TransactionItem
+            v-for="transaction in paginatedTransactions"
+            :key="transaction.id"
+            :transaction="transaction"
+            :selected="selectedIds.has(transaction.id)"
+            :selection-active="selectionActive"
+            @delete="deleteTransaction"
+            @edit="handleEdit"
+            @toggle-select="handleToggleSelect"
+          />
+        </div>
+
+        <!-- Pagination -->
+        <div v-if="totalPages > 1" class="pagination" ref="paginationBar">
+          <button
+            class="page-btn"
+            :disabled="currentPage === 1"
+            @click="goToPage(1)"
+            title="Première page"
+          >«</button>
+          <button
+            class="page-btn"
+            :disabled="currentPage === 1"
+            @click="goToPage(currentPage - 1)"
+            title="Page précédente"
+          >‹</button>
+
+          <template v-for="p in pageNumbers" :key="p">
+            <span v-if="p === '…'" class="page-ellipsis">…</span>
+            <button
+              v-else
+              class="page-btn"
+              :class="{ 'page-active': p === currentPage }"
+              @click="goToPage(p as number)"
+            >{{ p }}</button>
+          </template>
+
+          <button
+            class="page-btn"
+            :disabled="currentPage === totalPages"
+            @click="goToPage(currentPage + 1)"
+            title="Page suivante"
+          >›</button>
+          <button
+            class="page-btn"
+            :disabled="currentPage === totalPages"
+            @click="goToPage(totalPages)"
+            title="Dernière page"
+          >»</button>
+        </div>
+      </template>
     </div>
 
     <!-- Modale d'édition unitaire -->
@@ -108,7 +156,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useAccountStore } from '@/stores/accountStore';
 import { useCategoryStore } from '@/stores/categoryStore';
 import { useTransactionStore } from '@/stores/transactionStore';
@@ -133,6 +181,7 @@ const transactionStore = useTransactionStore();
 
 const loading = ref(false);
 const selectedAccountId = ref<number | null>(null);
+const transactionsCard = ref<HTMLElement | null>(null);
 const selectedType = ref<TransactionType | null>(null);
 const selectedCategoryId = ref<number | null>(null);
 const searchDescription = ref('');
@@ -144,6 +193,22 @@ const selectionActive = computed(() => selectedIds.value.size > 0);
 
 // État édition unitaire
 const editingTransaction = ref<Transaction | null>(null);
+
+// Pagination
+const PAGE_SIZE = 20;
+const currentPage = ref(1);
+const paginationBar = ref<HTMLElement | null>(null);
+
+const goToPage = (page: number) => {
+  const paginationViewportTop = paginationBar.value?.getBoundingClientRect().top ?? 0;
+  const scrollYBefore = window.scrollY;
+  currentPage.value = page;
+  nextTick(() => {
+    const newPaginationViewportTop = paginationBar.value?.getBoundingClientRect().top ?? paginationViewportTop;
+    const delta = newPaginationViewportTop - paginationViewportTop;
+    window.scrollTo({ top: Math.max(0, scrollYBefore + delta) });
+  });
+};
 
 const totalBalance = computed(() => accountStore.getTotalBalance());
 
@@ -176,6 +241,62 @@ const filteredTransactions = computed(() => {
 
   return transactions;
 });
+
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredTransactions.value.length / PAGE_SIZE)));
+
+const paginatedTransactions = computed(() => {
+  const start = (currentPage.value - 1) * PAGE_SIZE;
+  return filteredTransactions.value.slice(start, start + PAGE_SIZE);
+});
+
+const pageNumbers = computed(() => {
+  const total = totalPages.value;
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const current = currentPage.value;
+  const pages: (number | '…')[] = [1];
+  if (current > 3) pages.push('…');
+  for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) pages.push(i);
+  if (current < total - 2) pages.push('…');
+  pages.push(total);
+  return pages;
+});
+
+// Reset page + sélection quand les filtres changent
+watch(filteredTransactions, () => {
+  currentPage.value = 1;
+  selectedIds.value = new Set();
+});
+
+const smoothScrollTo = (target: number, duration = 600) => {
+  const start = window.scrollY;
+  const distance = target - start;
+  const startTime = performance.now();
+  const easeInOutCubic = (t: number) =>
+    t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const step = (now: number) => {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    window.scrollTo(0, start + distance * easeInOutCubic(progress));
+    if (progress < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+};
+
+// Clic sur une carte compte → filtre + scroll
+const handleAccountSelect = async (id: number) => {
+  if (selectedAccountId.value === id) {
+    selectedAccountId.value = null;
+  } else {
+    selectedAccountId.value = id;
+  }
+  await loadTransactions();
+  nextTick(() => {
+    if (!transactionsCard.value) return;
+    const headerHeight = document.querySelector('header')?.offsetHeight ?? 0;
+    const top = transactionsCard.value.getBoundingClientRect().top + window.scrollY - headerHeight;
+    smoothScrollTo(top);
+  });
+};
 
 // Charge les transactions
 const loadTransactions = async () => {
@@ -291,10 +412,77 @@ onMounted(async () => {
   gap: 12px;
 }
 
+.transactions-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.transactions-header .section-title {
+  margin-bottom: 0;
+}
+
+.tx-count {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
 .transactions-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+}
+
+.page-btn {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.page-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.page-btn.page-active {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+  font-weight: 600;
+}
+
+.page-ellipsis {
+  width: 36px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 36px;
 }
 
 .accounts-view > .card {

@@ -24,18 +24,22 @@ export interface AccountDTO {
   icon?: string;
 }
 
+export type CategoryType = 'CHARGES' | 'LOISIRS' | 'REVENUS'
+
 export interface Category {
   id: number;
   name: string;
   color: string | null;
   parent: Category | null;
   defaultCategory: boolean;
+  type: CategoryType | null;
 }
 
 export interface CategoryDTO {
   name: string;
   parentId?: number | null;
   color?: string;
+  type?: CategoryType;
 }
 
 export interface Transaction {
@@ -136,6 +140,8 @@ export interface CashFlowStats {
   savingsRate: number;
   incomeByCategory: Record<string, number>;
   expensesByCategory: Record<string, number>;
+  expensesByType: Record<string, number>;
+  incomeByType: Record<string, number>;
 }
 
 export interface MonthlyCashFlow {

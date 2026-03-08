@@ -2,13 +2,13 @@
   <header class="header">
     <div class="container">
       <div class="header-content">
-        <div class="logo">
+        <RouterLink to="/accueil" class="logo">
           <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
             <rect width="32" height="32" rx="8" fill="#2563eb"/>
             <path d="M10 12h12M10 16h12M10 20h8" stroke="white" stroke-width="2" stroke-linecap="round"/>
           </svg>
           <h1>Finance Manager</h1>
-        </div>
+        </RouterLink>
         <p class="tagline">Gérez vos finances personnelles</p>
 
         <label
@@ -103,6 +103,8 @@ const handleLogout = async () => {
   display: flex;
   align-items: center;
   gap: 12px;
+  text-decoration: none;
+  cursor: pointer;
 }
 
 .logo h1 {

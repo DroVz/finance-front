@@ -1,5 +1,6 @@
 <template>
   <div class="account-card">
+    <div class="drag-handle" title="Réordonner">⠿</div>
     <div class="account-icon">{{ account.icon || '💳' }}</div>
     <div class="account-details">
       <div class="account-name">{{ account.name }}</div>
@@ -58,11 +59,26 @@ const formattedBalance = computed(() => formatCurrency(props.account.currentBala
   padding: 20px;
   background: var(--bg-item);
   border-radius: 8px;
-  transition: background 0.2s;
+  transition: background 0.2s, opacity 0.2s;
 }
 
 .account-card:hover {
   background: var(--bg-hover);
+}
+
+.drag-handle {
+  font-size: 20px;
+  color: var(--text-secondary);
+  cursor: grab;
+  padding: 0 4px;
+  user-select: none;
+  opacity: 0.5;
+  transition: opacity 0.15s;
+}
+
+.drag-handle:hover {
+  opacity: 1;
+  color: var(--primary-color);
 }
 
 .account-icon {

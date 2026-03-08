@@ -33,6 +33,9 @@
       @change-range="changeChartRange"
     />
 
+    <!-- Breakdown par type (CHARGES / LOISIRS / REVENUS) -->
+    <TypeBreakdown v-if="stats && !loadingStats" :stats="stats" />
+
     <!-- Breakdown catégories du mois sélectionné -->
     <CategoryBreakdown v-if="stats && !loadingStats" :stats="stats" />
   </div>
@@ -44,6 +47,7 @@ import { useCashFlowStore } from '@/stores/cashFlowStore';
 import CashFlowSummary from '@/components/cashflow/CashFlowSummary.vue';
 import CashFlowChart from '@/components/cashflow/CashFlowChart.vue';
 import CategoryBreakdown from '@/components/cashflow/CategoryBreakdown.vue';
+import TypeBreakdown from '@/components/cashflow/TypeBreakdown.vue';
 import BudgetMonthSelector from '@/components/budget/BudgetMonthSelector.vue';
 
 const cashFlowStore = useCashFlowStore();
@@ -120,6 +124,9 @@ onMounted(async () => {
   max-width: 1400px;
   margin: 0 auto;
   padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .subtitle {

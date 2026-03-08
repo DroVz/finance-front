@@ -1,5 +1,9 @@
 <template>
-  <div class="account-item">
+  <div
+    class="account-item"
+    :class="{ 'account-item--active': active }"
+    @click="emit('select', account.id)"
+  >
     <div class="account-info">
       <div class="account-icon">{{ account.icon || '💳' }}</div>
       <div>
@@ -18,6 +22,11 @@ import type { Account } from '@/types'
 
 const props = defineProps<{
   account: Account
+  active?: boolean
+}>()
+
+const emit = defineEmits<{
+  select: [id: number]
 }>()
 
 const { formatCurrency } = useFormatters()
@@ -33,10 +42,17 @@ const formattedBalance = computed(() => formatCurrency(props.account.currentBala
   padding: 16px;
   background: var(--bg-item);
   border-radius: 8px;
-  transition: background 0.2s;
+  transition: background 0.2s, outline 0.15s;
+  cursor: pointer;
 }
 
 .account-item:hover {
+  background: var(--bg-hover);
+}
+
+.account-item--active {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
   background: var(--bg-hover);
 }
 

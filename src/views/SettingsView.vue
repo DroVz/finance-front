@@ -37,11 +37,17 @@
 
       <div v-else class="accounts-list">
         <AccountCard
-          v-for="account in accountStore.accounts"
+          v-for="(account, index) in accountStore.accounts"
           :key="account.id"
           :account="account"
+          draggable="true"
+          :class="{ 'drag-over': dragOverIndex === index, 'dragging': dragIndex === index }"
           @edit="editAccount"
           @delete="confirmDeleteAccount"
+          @dragstart="onDragStart(index, $event)"
+          @dragover.prevent="onDragOver(index)"
+          @drop.prevent="onDrop(index)"
+          @dragend="onDragEnd"
         />
       </div>
     </div>
@@ -74,6 +80,12 @@
             placeholder="Nom de la catégorie (ex: Restaurant)"
             required
           />
+          <select v-model="newCategory.type" class="form-input" required>
+            <option value="" disabled>— Type de catégorie —</option>
+            <option value="CHARGES">Charges</option>
+            <option value="LOISIRS">Loisirs & quotidien</option>
+            <option value="REVENUS">Revenus</option>
+          </select>
           <button type="submit" class="btn btn-primary" :disabled="categoryStore.loading">
             ➕ Ajouter
           </button>
@@ -209,7 +221,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useAccountStore } from '@/stores/accountStore';
 import { useCategoryStore } from '@/stores/categoryStore';
 import { profileService } from '@/services/profileService';
-import type { AccountDTO, CategoryDTO, Account } from '@/types';
+import type { AccountDTO, CategoryDTO, CategoryType, Account } from '@/types';
 import LoadingSpinner from '@/components/base/LoadingSpinner.vue';
 import EmptyState from '@/components/base/EmptyState.vue';
 import BaseModal from '@/components/base/BaseModal.vue';
@@ -223,6 +235,39 @@ const accountStore = useAccountStore();
 const categoryStore = useCategoryStore();
 
 const visibleCategories = computed(() => categoryStore.categories.filter(c => !c.defaultCategory));
+
+// Drag & drop pour réordonner les comptes
+const dragIndex = ref<number | null>(null);
+const dragOverIndex = ref<number | null>(null);
+
+const onDragStart = (index: number, event: DragEvent) => {
+  dragIndex.value = index;
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = 'move';
+  }
+};
+
+const onDragOver = (index: number) => {
+  if (dragIndex.value !== null && dragIndex.value !== index) {
+    dragOverIndex.value = index;
+  }
+};
+
+const onDrop = async (targetIndex: number) => {
+  if (dragIndex.value === null || dragIndex.value === targetIndex) return;
+  const accounts = [...accountStore.accounts];
+  const [moved] = accounts.splice(dragIndex.value, 1);
+  accounts.splice(targetIndex, 0, moved);
+  accountStore.accounts = accounts;
+  dragIndex.value = null;
+  dragOverIndex.value = null;
+  await accountStore.reorderAccounts(accounts.map(a => a.id));
+};
+
+const onDragEnd = () => {
+  dragIndex.value = null;
+  dragOverIndex.value = null;
+};
 
 onMounted(async () => {
   await Promise.all([
@@ -323,10 +368,11 @@ const doDeleteAccount = async () => {
 };
 
 // Gestion des catégories
-const newCategory = ref<CategoryDTO>({
+const newCategory = ref<CategoryDTO & { type: CategoryType | '' }>({
   name: '',
   parentId: null,
-  color: undefined
+  color: undefined,
+  type: ''
 });
 
 const categoryError = ref<string | null>(null);
@@ -339,7 +385,7 @@ const handleCreateCategory = async () => {
   try {
     await categoryStore.createCategory(newCategory.value);
     categorySuccess.value = 'Catégorie créée avec succès !';
-    newCategory.value = { name: '', parentId: null, color: undefined };
+    newCategory.value = { name: '', parentId: null, color: undefined, type: '' };
 
     setTimeout(() => {
       categorySuccess.value = null;
@@ -432,6 +478,15 @@ const handleChangePassword = async () => {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.accounts-list :deep(.dragging) {
+  opacity: 0.4;
+}
+
+.accounts-list :deep(.drag-over) {
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
 }
 
 .info-box {

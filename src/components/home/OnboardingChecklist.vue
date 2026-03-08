@@ -28,7 +28,7 @@
         class="step-item"
         :class="{ 'step-done': step.done, 'step-pending': !step.done }"
       >
-        <span class="step-icon">{{ step.done ? '✅' : '⬜' }}</span>
+        <span class="step-icon" :class="step.done ? 'icon-done' : 'icon-pending'"></span>
         <div class="step-content">
           <span class="step-label">{{ step.label }}</span>
           <span class="step-desc">{{ step.description }}</span>
@@ -185,8 +185,34 @@ const progressPercent = computed(() => Math.round((completedCount.value / props.
 }
 
 .step-icon {
-  font-size: 16px;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-done {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.icon-done::after {
+  content: '';
+  display: block;
+  width: 5px;
+  height: 9px;
+  border: 2px solid white;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg) translateY(-1px);
+}
+
+.icon-pending {
+  background: transparent;
 }
 
 .step-content {
