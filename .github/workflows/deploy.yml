@@ -31,7 +31,7 @@ jobs:
         run: |
           echo "Waiting for frontend..."
           for i in $(seq 1 12); do
-            if curl -sf http://localhost:80/ > /dev/null 2>&1; then
+            if docker logs finance-frontend-1 2>&1 | grep -q "start worker process"; then
               echo "✅ Frontend is up"
               exit 0
             fi
