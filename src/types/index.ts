@@ -24,17 +24,22 @@ export interface AccountDTO {
   icon?: string;
 }
 
+export type CategoryType = 'CHARGES' | 'LOISIRS' | 'REVENUS'
+
 export interface Category {
   id: number;
   name: string;
   color: string | null;
   parent: Category | null;
+  defaultCategory: boolean;
+  type: CategoryType | null;
 }
 
 export interface CategoryDTO {
   name: string;
   parentId?: number | null;
   color?: string;
+  type?: CategoryType;
 }
 
 export interface Transaction {
@@ -135,6 +140,8 @@ export interface CashFlowStats {
   savingsRate: number;
   incomeByCategory: Record<string, number>;
   expensesByCategory: Record<string, number>;
+  expensesByType: Record<string, number>;
+  incomeByType: Record<string, number>;
 }
 
 export interface MonthlyCashFlow {
@@ -184,4 +191,41 @@ export interface CsvImportRequest {
 export interface CsvImportResult {
   importedCount: number;
   skippedCount: number;
+}
+
+// Types pour le Budget
+
+export type BudgetRuleType = 'MAXIMUM' | 'MINIMUM' | 'TARGET';
+
+export interface BudgetRule {
+  id: number;
+  name: string;
+  description: string | null;
+  ruleType: BudgetRuleType;
+  percentage: number;
+  categoryId: number | null;
+  categoryName: string | null;
+  categoryColor: string | null;
+  monthlyIncome: number;
+  ruleAmount: number;
+  currentAmount: number;
+  currentPercentage: number;
+  difference: number;
+  status: 'RESPECTED' | 'EXCEEDED';
+  ruleStreak: number;
+  createdAt: string;
+}
+
+export interface BudgetRuleDTO {
+  name: string;
+  description?: string | null;
+  ruleType: BudgetRuleType;
+  percentage: number;
+  categoryId?: number | null;
+}
+
+export interface BudgetStreak {
+  currentStreak: number;
+  bestStreak: number;
+  lastRespectedMonth: string | null;
 }

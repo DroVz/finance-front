@@ -87,6 +87,37 @@ export const useTransactionStore = defineStore('transaction', () => {
     }
   };
 
+  // Met à jour la catégorie de plusieurs transactions en parallèle
+  const bulkUpdateCategory = async (ids: number[], categoryId: number) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      await Promise.all(
+        ids.map(id => {
+          const transaction = transactions.value.find(t => t.id === id);
+          if (!transaction) return Promise.resolve();
+          const dto = {
+            accountId: transaction.accountId,
+            categoryId,
+            amount: transaction.amount,
+            type: transaction.type,
+            description: transaction.description,
+            transactionDate: transaction.transactionDate,
+          };
+          return transactionService.update(id, dto).then(updated => {
+            const index = transactions.value.findIndex(t => t.id === id);
+            if (index !== -1) transactions.value[index] = updated;
+          });
+        })
+      );
+    } catch (e: any) {
+      error.value = e.response?.data?.message || 'Erreur lors de la mise à jour en masse';
+      throw e;
+    } finally {
+      loading.value = false;
+    }
+  };
+
   // Supprime une transaction
   const deleteTransaction = async (id: number) => {
     loading.value = true;
@@ -112,6 +143,7 @@ export const useTransactionStore = defineStore('transaction', () => {
     createTransaction,
     createTransfer,
     updateTransaction,
+    bulkUpdateCategory,
     deleteTransaction
   };
 });

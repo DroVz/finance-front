@@ -77,6 +77,12 @@ export const useAccountStore = defineStore('account', () => {
     return accounts.value.reduce((sum, account) => sum + account.currentBalance, 0);
   };
 
+  // Réordonne les comptes
+  const reorderAccounts = async (orderedIds: number[]) => {
+    await accountService.reorder(orderedIds);
+    await fetchAccounts();
+  };
+
   return {
     accounts,
     loading,
@@ -85,6 +91,7 @@ export const useAccountStore = defineStore('account', () => {
     createAccount,
     updateAccount,
     deleteAccount,
-    getTotalBalance
+    getTotalBalance,
+    reorderAccounts
   };
 });

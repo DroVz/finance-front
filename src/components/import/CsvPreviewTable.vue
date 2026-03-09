@@ -170,7 +170,7 @@ const formatDate = (dateStr: string): string => {
 }
 
 .preview-table th {
-  background: #f9fafb;
+  background: var(--bg-item);
   padding: 10px 12px;
   text-align: left;
   font-weight: 600;
@@ -181,7 +181,7 @@ const formatDate = (dateStr: string): string => {
 
 .preview-table td {
   padding: 8px 12px;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .preview-table tr:last-child td {
@@ -189,15 +189,15 @@ const formatDate = (dateStr: string): string => {
 }
 
 .preview-table tr:hover {
-  background: #f9fafb;
+  background: var(--bg-hover);
 }
 
 .row-transfer {
-  background: #eff6ff;
+  background: var(--bg-selected);
 }
 
 .row-transfer:hover {
-  background: #dbeafe;
+  background: var(--bg-info-tint);
 }
 
 /* Largeurs fixes des colonnes */
@@ -261,7 +261,8 @@ const formatDate = (dateStr: string): string => {
   border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 13px;
-  background: white;
+  background: var(--bg-input);
+  color: var(--text-primary);
 }
 
 .category-select:focus {

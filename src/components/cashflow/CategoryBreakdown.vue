@@ -46,11 +46,6 @@
       </div>
     </div>
 
-    <!-- Cash Flow résultant -->
-    <div class="cash-flow-result" :class="cashFlowClass">
-      <span class="result-label">💰 CASH FLOW DU MOIS</span>
-      <span class="result-amount">{{ formatCurrency(cashFlow) }}</span>
-    </div>
   </div>
 </template>
 
@@ -80,14 +75,7 @@ const expensesEntries = computed(() => {
 // Totaux
 const totalIncome = computed(() => props.stats.totalIncome);
 const totalExpenses = computed(() => props.stats.totalExpenses);
-const cashFlow = computed(() => props.stats.cashFlow);
 
-// Classe CSS dynamique pour le cash flow
-const cashFlowClass = computed(() => {
-  if (props.stats.cashFlow > 0) return 'positive';
-  if (props.stats.cashFlow === 0) return 'neutral';
-  return 'negative';
-});
 </script>
 
 <style scoped>
@@ -98,7 +86,7 @@ const cashFlowClass = computed(() => {
 }
 
 .breakdown-section {
-  background: white;
+  background: var(--bg-card);
   border-radius: var(--radius);
   padding: 24px;
   box-shadow: var(--shadow-sm);
@@ -127,7 +115,7 @@ const cashFlowClass = computed(() => {
 }
 
 .category-item:hover {
-  background: #f9fafb;
+  background: var(--bg-hover);
 }
 
 .category-item.income {
@@ -163,8 +151,8 @@ const cashFlowClass = computed(() => {
   align-items: center;
   padding: 14px 12px;
   margin-top: 12px;
-  border-top: 2px solid #e5e7eb;
-  background: #f9fafb;
+  border-top: 2px solid var(--border-color);
+  background: var(--bg-hover);
   border-radius: 6px;
 }
 
@@ -187,42 +175,6 @@ const cashFlowClass = computed(() => {
   font-style: italic;
 }
 
-/* Cash Flow résultant */
-.cash-flow-result {
-  grid-column: 1 / -1;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 24px;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-md);
-  font-weight: 700;
-}
-
-.cash-flow-result.positive {
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: white;
-}
-
-.cash-flow-result.neutral {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  color: white;
-}
-
-.cash-flow-result.negative {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  color: white;
-}
-
-.result-label {
-  font-size: 16px;
-  letter-spacing: 1px;
-}
-
-.result-amount {
-  font-size: 28px;
-}
-
 @media (max-width: 1024px) {
   .category-breakdown {
     grid-template-columns: 1fr;
@@ -236,10 +188,6 @@ const cashFlowClass = computed(() => {
 
   .category-item {
     padding: 10px;
-  }
-
-  .result-amount {
-    font-size: 24px;
   }
 }
 </style>

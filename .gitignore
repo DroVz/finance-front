@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Fichiers sensibles — ne jamais commiter
+ssh.md
+.env
+.env.*
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

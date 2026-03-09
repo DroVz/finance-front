@@ -1,5 +1,6 @@
 <template>
   <div class="account-card">
+    <div class="drag-handle" title="Réordonner">⠿</div>
     <div class="account-icon">{{ account.icon || '💳' }}</div>
     <div class="account-details">
       <div class="account-name">{{ account.name }}</div>
@@ -17,22 +18,25 @@
         @click="emit('edit', account)"
         title="Modifier"
       >
-        ✏️
+        <IconEdit :size="16" />
       </button>
       <button
         class="btn-icon btn-icon-danger"
         @click="emit('delete', account.id)"
         title="Supprimer"
       >
-        🗑️
+        <IconTrash :size="16" />
       </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useFormatters } from '@/composables/useFormatters'
 import type { Account } from '@/types'
+import IconTrash from '@/components/base/IconTrash.vue'
+import IconEdit from '@/components/base/IconEdit.vue'
 
 const props = defineProps<{
   account: Account
@@ -44,7 +48,7 @@ const emit = defineEmits<{
 }>()
 
 const { formatCurrency } = useFormatters()
-const formattedBalance = formatCurrency(props.account.currentBalance)
+const formattedBalance = computed(() => formatCurrency(props.account.currentBalance))
 </script>
 
 <style scoped>
@@ -53,13 +57,28 @@ const formattedBalance = formatCurrency(props.account.currentBalance)
   align-items: center;
   gap: 16px;
   padding: 20px;
-  background: var(--bg-light);
+  background: var(--bg-item);
   border-radius: 8px;
-  transition: background 0.2s;
+  transition: background 0.2s, opacity 0.2s;
 }
 
 .account-card:hover {
-  background: #e5e7eb;
+  background: var(--bg-hover);
+}
+
+.drag-handle {
+  font-size: 20px;
+  color: var(--text-secondary);
+  cursor: grab;
+  padding: 0 4px;
+  user-select: none;
+  opacity: 0.5;
+  transition: opacity 0.15s;
+}
+
+.drag-handle:hover {
+  opacity: 1;
+  color: var(--primary-color);
 }
 
 .account-icon {
@@ -108,18 +127,18 @@ const formattedBalance = formatCurrency(props.account.currentBalance)
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 20px;
-  opacity: 0.6;
+  color: var(--text-secondary);
   transition: all 0.2s;
   border-radius: 4px;
 }
 
 .btn-icon:hover {
-  opacity: 1;
-  background: rgba(0, 0, 0, 0.05);
+  color: var(--primary-color);
+  background: var(--bg-icon-hover);
 }
 
 .btn-icon-danger:hover {
-  background: #fee2e2;
+  background: var(--bg-icon-danger-hover);
+  color: var(--color-icon-danger-hover);
 }
 </style>

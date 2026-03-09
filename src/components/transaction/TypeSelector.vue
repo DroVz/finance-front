@@ -46,7 +46,8 @@ const types = [
   padding: 20px;
   border: 2px solid var(--border-color);
   border-radius: var(--radius);
-  background: white;
+  background: var(--bg-card);
+  color: var(--text-primary);
   cursor: pointer;
   transition: all 0.2s;
   font-size: 16px;
@@ -55,7 +56,7 @@ const types = [
 
 .type-btn:hover {
   border-color: var(--primary-color);
-  background: #eff6ff;
+  background: var(--bg-selected);
 }
 
 .type-btn.active {

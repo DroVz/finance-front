@@ -352,16 +352,10 @@ const handleSubmit = async () => {
       name: formData.value.name.trim()
     });
 
-    // Notification succès
-    alert(`✅ Objectif "${objective.name}" créé avec succès !\n\n🎯 Objectif : ${formatCurrency(objective.targetAmount)}\n${objective.targetDate ? `📅 Échéance : ${formatDate(objective.targetDate)}` : '💡 Épargnez à votre rythme !'}`);
-
-    // Fermer le modal et rediriger
     emit('close');
-
-    // Recharger les objectifs
     await objectiveStore.fetchObjectives();
-  } catch (error: any) {
-    alert(error.response?.data?.message || "Erreur lors de la création de l'objectif");
+  } catch {
+    // erreur disponible dans objectiveStore.error
   } finally {
     submitting.value = false;
   }
@@ -409,9 +403,9 @@ onMounted(async () => {
 }
 
 .alert-danger {
-  background: #fee2e2;
-  color: #991b1b;
-  border: 1px solid #fca5a5;
+  background: var(--bg-danger-tint);
+  color: var(--text-danger-tint);
+  border: 1px solid var(--danger-color);
 }
 
 .form-group {
@@ -432,9 +426,11 @@ onMounted(async () => {
 .form-select {
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   font-size: 14px;
+  background: var(--bg-input);
+  color: var(--text-primary);
 }
 
 .form-input.error {
@@ -470,16 +466,18 @@ onMounted(async () => {
 
 .date-shortcuts button {
   padding: 4px 12px;
-  background: var(--bg-light);
-  border: 1px solid #d1d5db;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   cursor: pointer;
   font-size: 12px;
+  color: var(--text-primary);
   transition: background 0.2s;
 }
 
 .date-shortcuts button:hover {
-  background: #e5e7eb;
+  background: var(--bg-hover);
+  border-color: var(--primary-color);
 }
 
 .effort-display {
@@ -488,9 +486,10 @@ onMounted(async () => {
 
 .effort-card {
   padding: 16px;
-  background: #dbeafe;
+  background: var(--bg-info-tint);
   border-radius: 8px;
   border-left: 4px solid var(--primary-color);
+  color: var(--text-info-tint);
 }
 
 .effort-main {
@@ -514,18 +513,21 @@ onMounted(async () => {
 }
 
 .feasibility-easy {
-  background: #d1fae5;
+  background: var(--bg-success-tint);
   border-left: 4px solid var(--success-color);
+  color: var(--text-success-tint);
 }
 
 .feasibility-ambitious {
-  background: #fed7aa;
-  border-left: 4px solid #f59e0b;
+  background: var(--bg-warning-tint);
+  border-left: 4px solid var(--warning-color);
+  color: var(--text-warning-tint);
 }
 
 .feasibility-difficult {
-  background: #fee2e2;
+  background: var(--bg-danger-tint);
   border-left: 4px solid var(--danger-color);
+  color: var(--text-danger-tint);
 }
 
 .feasibility-icon {
@@ -577,7 +579,7 @@ onMounted(async () => {
 }
 
 .btn-secondary:hover {
-  background: #e5e7eb;
+  background: var(--bg-hover);
 }
 
 @media (max-width: 768px) {

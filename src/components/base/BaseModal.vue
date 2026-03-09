@@ -36,7 +36,7 @@ const handleClose = () => {
 }
 
 .modal-content {
-  background: white;
+  background: var(--bg-card);
   padding: 32px;
   border-radius: var(--radius);
   max-width: 500px;

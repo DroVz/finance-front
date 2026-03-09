@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { categoryService } from '@/services/categoryService';
 import type { Category, CategoryDTO } from '@/types';
 
@@ -72,8 +72,14 @@ export const useCategoryStore = defineStore('category', () => {
     }
   };
 
+  // Catégorie système par défaut ("Non attribué")
+  const defaultCategory = computed<Category | null>(() =>
+    categories.value.find(c => c.defaultCategory) ?? null
+  )
+
   return {
     categories,
+    defaultCategory,
     loading,
     error,
     fetchCategories,

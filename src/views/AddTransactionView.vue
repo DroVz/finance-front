@@ -15,7 +15,8 @@
       <TransactionForm
         v-if="selectedType !== TransactionType.TRANSFER"
         v-model="form"
-        :categories="categoryStore.categories"
+        :categories="selectableCategories"
+        :default-category-id="categoryStore.defaultCategory?.id"
         :accounts="accountStore.accounts"
         :loading="loading"
         @submit="handleSubmit"
@@ -47,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useAccountStore } from '@/stores/accountStore';
 import { useCategoryStore } from '@/stores/categoryStore';
 import { useTransactionStore } from '@/stores/transactionStore';
@@ -64,6 +65,8 @@ const categoryStore = useCategoryStore();
 const transactionStore = useTransactionStore();
 const objectiveStore = useObjectiveStore();
 
+const selectableCategories = computed(() => categoryStore.categories.filter(c => !c.defaultCategory));
+
 const selectedType = ref<TransactionType>(TransactionType.EXPENSE);
 const loading = ref(false);
 const error = ref<string | null>(null);
@@ -79,6 +82,17 @@ const form = ref<TransactionDTO>({
   description: null,
   transactionDate: new Date().toISOString().split('T')[0]
 });
+
+// Pré-sélectionne la catégorie par défaut dès qu'elle est disponible
+watch(
+  () => categoryStore.defaultCategory,
+  (defaultCat) => {
+    if (defaultCat && !form.value.categoryId) {
+      form.value = { ...form.value, categoryId: defaultCat.id };
+    }
+  },
+  { immediate: true }
+);
 
 // Formulaire pour TRANSFER
 const transferForm = ref<TransferDTO>({
@@ -103,7 +117,7 @@ const handleSubmit = async () => {
     // Reset du formulaire
     form.value = {
       accountId: null as any,
-      categoryId: null as any,
+      categoryId: categoryStore.defaultCategory?.id ?? (null as any),
       amount: 0,
       type: selectedType.value,
       description: null,

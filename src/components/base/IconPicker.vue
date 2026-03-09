@@ -59,9 +59,10 @@ onUnmounted(() => document.removeEventListener('click', onClickOutside))
   align-items: center;
   gap: 6px;
   padding: 6px 10px;
-  border: 1px solid var(--border-color, #d1d5db);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  background: white;
+  background: var(--bg-card);
+  color: var(--text-primary);
   cursor: pointer;
   font-family: inherit;
   transition: border-color 0.2s;
@@ -89,10 +90,10 @@ onUnmounted(() => document.removeEventListener('click', onClickOutside))
   grid-template-columns: repeat(4, 1fr);
   gap: 4px;
   padding: 8px;
-  background: white;
-  border: 1px solid var(--border-color, #d1d5db);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-lg);
   z-index: 10;
 }
 
@@ -109,10 +110,11 @@ onUnmounted(() => document.removeEventListener('click', onClickOutside))
 }
 
 .picker-option:hover {
-  background: #eff6ff;
+  background: var(--bg-selected);
 }
 
 .picker-option.active {
-  background: #dbeafe;
+  background: var(--bg-selected);
+  outline: 2px solid var(--primary-color);
 }
 </style>

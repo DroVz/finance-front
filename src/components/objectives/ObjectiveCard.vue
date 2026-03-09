@@ -3,7 +3,7 @@
     <div class="card-header">
       <h4 class="objective-name">{{ objective.name }}</h4>
       <button class="btn-delete" @click="$emit('delete', objective.id)" title="Supprimer">
-        🗑️
+        <IconTrash :size="16" />
       </button>
     </div>
 
@@ -53,6 +53,7 @@
 <script setup lang="ts">
 import { useFormatters } from '@/composables/useFormatters';
 import type { Objective } from '@/types';
+import IconTrash from '@/components/base/IconTrash.vue';
 
 defineProps<{
   objective: Objective;
@@ -67,7 +68,7 @@ const { formatCurrency, formatDate } = useFormatters();
 
 <style scoped>
 .objective-card {
-  background: white;
+  background: var(--bg-card);
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -97,14 +98,15 @@ const { formatCurrency, formatDate } = useFormatters();
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 18px;
-  opacity: 0.5;
+  color: var(--text-secondary);
   padding: 4px;
-  transition: opacity 0.2s;
+  border-radius: 4px;
+  transition: all 0.2s;
 }
 
 .btn-delete:hover {
-  opacity: 1;
+  background: var(--bg-icon-danger-hover);
+  color: var(--color-icon-danger-hover);
 }
 
 .objective-amount {
@@ -125,7 +127,7 @@ const { formatCurrency, formatDate } = useFormatters();
 .progress-bar {
   width: 100%;
   height: 8px;
-  background: var(--bg-light);
+  background: var(--bg-hover);
   border-radius: 4px;
   overflow: hidden;
   margin-bottom: 8px;
@@ -163,7 +165,7 @@ const { formatCurrency, formatDate } = useFormatters();
 .info-badge {
   margin-left: auto;
   padding: 2px 8px;
-  background: var(--bg-light);
+  background: var(--bg-item);
   border-radius: 12px;
   font-size: 11px;
   font-weight: 500;
@@ -172,8 +174,8 @@ const { formatCurrency, formatDate } = useFormatters();
 .completed-badge {
   margin-top: 12px;
   padding: 8px;
-  background: #d1fae5;
-  color: var(--success-color);
+  background: var(--bg-success-tint);
+  color: var(--text-success-tint);
   border-radius: 6px;
   text-align: center;
   font-weight: 600;

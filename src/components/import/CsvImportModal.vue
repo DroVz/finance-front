@@ -362,13 +362,13 @@ const handleClose = () => {
 }
 
 .result-success {
-  background: #d1fae5;
-  color: #065f46;
+  background: var(--bg-success-tint);
+  color: var(--text-success-tint);
 }
 
 .result-warning {
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--bg-warning-tint);
+  color: var(--text-warning-tint);
 }
 
 .result-number {

@@ -32,14 +32,20 @@
         class="form-select"
         required
       >
-        <option :value="null" disabled>Sélectionner une catégorie</option>
-        <option
-          v-for="category in categories"
-          :key="category.id"
-          :value="category.id"
-        >
-          {{ category.name }}
-        </option>
+        <option v-if="defaultCategoryId" :value="defaultCategoryId" disabled>Non attribué (par défaut)</option>
+        <option v-else :value="null" disabled>Sélectionner une catégorie</option>
+        <optgroup v-if="chargesCategories.length" label="Charges">
+          <option v-for="c in chargesCategories" :key="c.id" :value="c.id">{{ c.name }}</option>
+        </optgroup>
+        <optgroup v-if="loisirsCategories.length" label="Loisirs & quotidien">
+          <option v-for="c in loisirsCategories" :key="c.id" :value="c.id">{{ c.name }}</option>
+        </optgroup>
+        <optgroup v-if="revenusCategories.length" label="Revenus">
+          <option v-for="c in revenusCategories" :key="c.id" :value="c.id">{{ c.name }}</option>
+        </optgroup>
+        <optgroup v-if="otherCategories.length" label="Autres">
+          <option v-for="c in otherCategories" :key="c.id" :value="c.id">{{ c.name }}</option>
+        </optgroup>
       </select>
     </div>
 
@@ -79,6 +85,7 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { TransactionDTO, Account, Category } from '@/types'
 
 const props = defineProps<{
@@ -86,6 +93,7 @@ const props = defineProps<{
   categories: Category[]
   accounts: Account[]
   loading: boolean
+  defaultCategoryId?: number | null
 }>()
 
 const emit = defineEmits<{
@@ -99,6 +107,12 @@ const updateField = (field: keyof TransactionDTO, value: any) => {
     [field]: value
   })
 }
+
+const nonDefaultCategories = computed(() => props.categories.filter(c => !c.defaultCategory))
+const chargesCategories = computed(() => nonDefaultCategories.value.filter(c => c.type === 'CHARGES'))
+const loisirsCategories = computed(() => nonDefaultCategories.value.filter(c => c.type === 'LOISIRS'))
+const revenusCategories = computed(() => nonDefaultCategories.value.filter(c => c.type === 'REVENUS'))
+const otherCategories = computed(() => nonDefaultCategories.value.filter(c => !c.type))
 </script>
 
 <style scoped>
