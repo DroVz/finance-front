@@ -1,224 +1,159 @@
-# Finance Manager - Frontend
+# Finance Manager — Frontend
 
-Interface Vue 3 pour l'application de gestion de finances personnelles.
+Interface utilisateur pour l'application de gestion de finances personnelles.
 
-## 🏗️ Technologies
+## Vue d'ensemble
 
-- **Vue 3** (Composition API)
-- **TypeScript**
-- **Vite** (build tool)
-- **Pinia** (state management)
-- **Vue Router** (routing)
-- **Axios** (HTTP client)
+Le frontend consomme l'API REST du backend pour afficher les comptes, transactions, budgets et objectifs d'épargne de l'utilisateur connecté. L'authentification est gérée via cookie de session (pas de JWT).
 
-## 📁 Structure du projet
+## Stack technique
+
+| Technologie | Version | Rôle |
+|---|---|---|
+| Vue 3 | — | Framework UI (Composition API + `<script setup>`) |
+| TypeScript | — | Typage statique |
+| Vite | — | Build tool et serveur de développement |
+| Pinia | — | State management |
+| Vue Router | — | Navigation |
+| Axios | — | Appels HTTP |
+| ApexCharts | — | Graphiques |
+
+## Structure du projet
 
 ```
 src/
-├── assets/          # Styles CSS globaux
+├── assets/          # CSS global (variables, reset, thème clair/sombre)
 ├── components/      # Composants réutilisables
-│   └── Header.vue   # En-tête avec navigation
-├── views/           # Pages de l'application
-│   ├── AddTransactionView.vue    # Ajout de transactions
-│   ├── AccountsView.vue           # Vue des comptes et transactions
-│   ├── CashFlowView.vue           # Analyse du cash flow
-│   └── SettingsView.vue           # Gestion des comptes et catégories
-├── services/        # Services API
-│   ├── api.ts                  # Configuration Axios
-│   ├── accountService.ts       # API comptes
-│   ├── categoryService.ts      # API catégories
-│   ├── transactionService.ts   # API transactions
-│   └── dashboardService.ts     # API statistiques
-├── stores/          # Stores Pinia
-│   ├── accountStore.ts         # État des comptes
-│   ├── categoryStore.ts        # État des catégories
-│   └── transactionStore.ts     # État des transactions
-├── types/           # Types TypeScript
-│   └── index.ts     # Définitions des interfaces
-├── router/          # Configuration du routeur
-│   └── index.ts
-├── App.vue          # Composant racine
-└── main.ts          # Point d'entrée
+│   ├── base/        # Composants génériques (LoadingSpinner, EmptyState, ConfirmModal...)
+│   ├── accounts/    # AccountCard, AccountItem
+│   ├── budget/      # BudgetRuleCard, BudgetStreakCard
+│   ├── cashflow/    # CashFlowChart, CashFlowSummary, CategoryBreakdown
+│   ├── home/        # OnboardingChecklist, KPI cards
+│   ├── import/      # CsvImportModal
+│   ├── objectives/  # ObjectiveCard
+│   ├── settings/    # CategoryCard, ColorPicker
+│   └── transaction/ # AddTransactionModal, TransactionForm, TransferForm, TypeSelector
+├── views/           # Pages (une par route)
+│   ├── LoginView.vue
+│   ├── HomeView.vue          # Dashboard (KPIs, checklist, résumé)
+│   ├── AccountsView.vue      # Gestion des comptes
+│   ├── TransactionsView.vue  # Liste et filtres des transactions
+│   ├── CashFlowView.vue      # Analyse mensuelle du cash flow
+│   ├── BudgetView.vue        # Règles budgétaires et suivi
+│   ├── ObjectivesView.vue    # Objectifs d'épargne
+│   ├── SettingsView.vue      # Catégories et mot de passe
+│   └── AdminView.vue         # Gestion des utilisateurs (ROLE_ADMIN)
+├── stores/          # Stores Pinia (un par domaine)
+│   ├── authStore.ts
+│   ├── accountStore.ts
+│   ├── transactionStore.ts
+│   ├── categoryStore.ts
+│   ├── budgetStore.ts
+│   ├── cashFlowStore.ts
+│   └── objectiveStore.ts
+├── services/        # Appels API (un fichier par ressource)
+│   ├── api.ts                # Instance Axios configurée (baseURL, withCredentials)
+│   ├── authService.ts
+│   ├── accountService.ts
+│   ├── transactionService.ts
+│   ├── categoryService.ts
+│   ├── cashFlowService.ts
+│   ├── budgetService.ts
+│   ├── objectiveService.ts
+│   └── profileService.ts
+├── router/
+│   └── index.ts              # Routes + garde de navigation (redirect si non connecté)
+├── types/
+│   └── index.ts              # Toutes les interfaces TypeScript
+├── App.vue                   # Racine : layout, FAB, AddTransactionModal
+└── main.ts
 ```
 
-## 🚀 Installation
+## Lancement en local
 
 ### Prérequis
-- Node.js 18+
-- npm 10+
-- Le backend doit être lancé sur http://localhost:8080
 
-### Étapes
+- Node.js 22+
+- Le backend doit tourner sur `http://localhost:8080`
+
+### Installation et démarrage
 
 ```bash
-# 1. Installer les dépendances
-cd frontend
 npm install
-
-# 2. Lancer le serveur de développement
 npm run dev
-
-# L'application sera accessible sur http://localhost:5173
 ```
 
-## 🎨 Pages de l'application
-
-### 1. Ajouter (/ajouter)
-- Formulaire pour créer des transactions (Dépense, Revenu, Virement)
-- Sélection du type avec interface à onglets
-- Validation des données avant soumission
-- Bouton d'import CSV (fonctionnalité à venir)
-
-### 2. Comptes (/comptes)
-- 3 KPI cards (Solde total, Revenus, Dépenses)
-- Vue des soldes par compte
-- Filtres par compte et type
-- Historique des transactions avec possibilité de suppression
-
-### 3. Cash Flow (/cashflow)
-- 4 métriques principales (Revenus, Dépenses, Solde net, Taux d'épargne)
-- Placeholders pour graphiques d'évolution (à implémenter)
-- Dépenses par catégorie avec barres de progression
-- Revenus par catégorie avec barres de progression
-
-### 4. Paramètres (/parametres)
-- Gestion des comptes (CRUD)
-- Gestion des catégories (CRUD)
-- Modal d'édition de compte
-- Info box avec conseils d'utilisation
-
-## 🔧 Développement
+L'application est accessible sur `http://localhost:5173`.
 
 ### Commandes disponibles
 
 ```bash
-# Développement avec hot-reload
-npm run dev
-
-# Build de production
-npm run build
-
-# Preview du build de production
-npm run preview
-
-# Vérification TypeScript
-npm run build  # qui lance vue-tsc
+npm run dev      # Serveur de développement avec hot reload
+npm run build    # Build de production (dans dist/)
+npm run preview  # Prévisualiser le build de production
 ```
 
-### Architecture des stores
+## Fonctionnement général
 
-L'application utilise Pinia pour la gestion d'état. Chaque store gère :
-- Les données (ref)
-- Les états de chargement et d'erreur
-- Les actions CRUD
-- Les méthodes utilitaires
+### Authentification
 
-Exemple d'utilisation :
-```typescript
-import { useAccountStore } from '@/stores/accountStore';
+La connexion se fait via `POST /api/auth/login`. Le backend retourne un cookie de session. Axios est configuré avec `withCredentials: true` pour l'envoyer automatiquement sur chaque requête.
 
-const accountStore = useAccountStore();
+La garde de navigation dans `router/index.ts` vérifie que l'utilisateur est connecté avant chaque changement de route.
 
-// Charger les données
-await accountStore.fetchAccounts();
+### Pattern store
 
-// Accéder aux données
-const accounts = accountStore.accounts;
-const totalBalance = accountStore.getTotalBalance();
-```
-
-### Services API
-
-Tous les appels API sont centralisés dans les services :
+Chaque store suit le même pattern :
 
 ```typescript
-import { accountService } from '@/services/accountService';
+// Exemple : accountStore.ts
+const accounts = ref<Account[]>([])
+const loading = ref(false)
 
-// Créer un compte
-const account = await accountService.create({
-  name: 'Compte Courant',
-  initialBalance: 1000,
-  currency: 'EUR'
-});
+const fetchAccounts = async () => { ... }
+const createAccount = async (dto: AccountDTO) => { ... }
 ```
 
-## 🎨 Personnalisation des styles
+Les vues appellent `onMounted(() => store.fetch...)` et accèdent aux données via `store.accounts`.
 
-Les variables CSS sont définies dans `src/assets/main.css` :
+### Ajouter une transaction
 
-```css
-:root {
-  --primary-color: #2563eb;
-  --success-color: #10b981;
-  --danger-color: #ef4444;
-  --warning-color: #f59e0b;
-  --bg-light: #f5f5f7;
-  --border-color: #e5e7eb;
-  /* ... */
-}
-```
+Le bouton **+** (FAB fixe en bas à droite) est disponible sur toutes les pages. Il ouvre `AddTransactionModal` qui contient le formulaire complet (dépense, revenu, virement, import CSV).
 
-## 📱 Responsive
+### Types de catégorie
 
-L'application est responsive et s'adapte aux mobiles avec :
-- Grilles adaptatives (`grid-template-columns: repeat(auto-fit, ...)`)
-- Media queries pour les petits écrans
-- Navigation horizontale scrollable sur mobile
+Les catégories ont un type : `CHARGES`, `LOISIRS`, ou `REVENUS`. Ce type est utilisé pour les filtres dans la vue Transactions et les graphiques Cash Flow.
 
-## 🔒 Sécurité
+## Pages principales
 
-- Validation des formulaires côté client
-- Messages d'erreur clairs provenant du backend
-- Confirmations avant suppression
-- Pas de stockage de données sensibles en localStorage
+| Route | Vue | Description |
+|---|---|---|
+| `/` | HomeView | Dashboard, KPIs du mois, checklist d'onboarding |
+| `/comptes` | AccountsView | Gestion des comptes (CRUD, drag & drop) |
+| `/transactions` | TransactionsView | Historique filtrable par mois, type, catégorie |
+| `/cashflow` | CashFlowView | Graphique d'évolution + répartition par catégorie |
+| `/budget` | BudgetView | Règles budgétaires et streak mensuel |
+| `/objectifs` | ObjectivesView | Objectifs d'épargne avec progression |
+| `/parametres` | SettingsView | Catégories personnelles + changement de mot de passe |
+| `/admin` | AdminView | Gestion des utilisateurs (admin uniquement) |
 
-## 🚧 Fonctionnalités à venir
+## Thème
 
-### Import CSV
-- Upload de fichier
-- Mapping des colonnes
-- Prévisualisation avec édition
-- Complétion manuelle des champs manquants
+L'application supporte le mode clair et sombre via les variables CSS dans `src/assets/main.css`. Le thème suit automatiquement la préférence système (`prefers-color-scheme`).
 
-### Graphiques
-- Évolution mensuelle (Chart.js)
-- Tendance du solde
-- Diagrammes circulaires pour les catégories
+## Troubleshooting
 
-### Améliorations UX
-- Notifications toast
-- Loading states plus élaborés
-- Pagination pour les grandes listes
-- Recherche et tri avancés
+**Erreur CORS au démarrage**
 
-## 🐛 Troubleshooting
+Vérifier que le backend tourne bien sur le port 8080 et que `CORS` est configuré pour `http://localhost:5173`.
 
-### Le backend ne répond pas
-Vérifiez que :
-1. Le backend est bien lancé sur le port 8080
-2. CORS est configuré correctement côté backend
-3. PostgreSQL est démarré
+**`401 Unauthorized` sur toutes les requêtes**
 
-### Erreur de compilation TypeScript
+La session a expiré ou l'utilisateur n'est pas connecté. Vider les cookies et se reconnecter.
+
+**Dépendances corrompues**
+
 ```bash
-# Nettoyer et réinstaller
-rm -rf node_modules package-lock.json
+rm -rf node_modules
 npm install
 ```
-
-### Hot reload ne fonctionne pas
-```bash
-# Relancer le serveur
-npm run dev
-```
-
-## 📚 Ressources
-
-- [Vue 3 Documentation](https://vuejs.org/)
-- [Pinia Documentation](https://pinia.vuejs.org/)
-- [Vite Documentation](https://vitejs.dev/)
-- [TypeScript Documentation](https://www.typescriptlang.org/)
-
----
-
-*Frontend développé avec Vue 3 + TypeScript pour Finance Manager* 🚀
