@@ -47,10 +47,12 @@
             :lines="previewLines"
             :categories="categories"
             :accounts="accounts"
+            :objectives="objectives"
             :detected-format="detectedFormat"
             @update-category="handleCategoryUpdate"
             @toggle-transfer="handleToggleTransfer"
             @update-linked-account="handleLinkedAccountUpdate"
+            @update-linked-objective="handleLinkedObjectiveUpdate"
           />
         </div>
 
@@ -105,12 +107,13 @@ import { useRouter } from 'vue-router'
 import BaseModal from '@/components/base/BaseModal.vue'
 import CsvPreviewTable from '@/components/import/CsvPreviewTable.vue'
 import csvImportService from '@/services/csvImportService'
-import type { Account, Category, CsvPreviewLine, CsvImportResult } from '@/types'
+import type { Account, Category, CsvPreviewLine, CsvImportResult, Objective } from '@/types'
 
 const props = defineProps<{
   show: boolean
   accounts: Account[]
   categories: Category[]
+  objectives: Objective[]
 }>()
 
 const emit = defineEmits<{
@@ -230,6 +233,13 @@ const handleLinkedAccountUpdate = (lineNumber: number, accountId: number) => {
   }
 }
 
+const handleLinkedObjectiveUpdate = (lineNumber: number, objectiveId: number | null) => {
+  const line = previewLines.value.find(l => l.lineNumber === lineNumber) as any
+  if (line) {
+    line._objectiveId = objectiveId
+  }
+}
+
 const handleConfirm = async () => {
   if (!selectedAccountId.value) return
 
@@ -249,7 +259,8 @@ const handleConfirm = async () => {
           type: line.type,
           categoryId: isTransfer ? 0 : line.suggestedCategoryId!,
           transfer: isTransfer,
-          linkedAccountId: isTransfer ? (line as any)._linkedAccountId : null
+          linkedAccountId: isTransfer ? (line as any)._linkedAccountId : null,
+          objectiveId: isTransfer ? ((line as any)._objectiveId ?? null) : null
         }
       })
     }

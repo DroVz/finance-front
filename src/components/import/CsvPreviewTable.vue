@@ -44,22 +44,38 @@
               />
             </td>
             <td class="col-category">
-              <!-- Si virement : sélection du compte lié -->
-              <select
-                v-if="isMarkedAsTransfer(line)"
-                class="category-select"
-                :value="getLinkedAccountId(line)"
-                @change="updateLinkedAccount(line.lineNumber, Number(($event.target as HTMLSelectElement).value))"
-              >
-                <option :value="0">-- Compte lié --</option>
-                <option
-                  v-for="account in accounts"
-                  :key="account.id"
-                  :value="account.id"
+              <!-- Si virement : sélection du compte lié + objectif optionnel -->
+              <template v-if="isMarkedAsTransfer(line)">
+                <select
+                  class="category-select"
+                  :value="getLinkedAccountId(line)"
+                  @change="updateLinkedAccount(line.lineNumber, Number(($event.target as HTMLSelectElement).value))"
                 >
-                  {{ account.name }}
-                </option>
-              </select>
+                  <option :value="0">-- Compte lié --</option>
+                  <option
+                    v-for="account in accounts"
+                    :key="account.id"
+                    :value="account.id"
+                  >
+                    {{ account.name }}
+                  </option>
+                </select>
+                <select
+                  v-if="objectives.length > 0"
+                  class="category-select objective-select"
+                  :value="getLinkedObjectiveId(line)"
+                  @change="updateLinkedObjective(line.lineNumber, Number(($event.target as HTMLSelectElement).value))"
+                >
+                  <option :value="0">🎯 Objectif (optionnel)</option>
+                  <option
+                    v-for="obj in objectives"
+                    :key="obj.id"
+                    :value="obj.id"
+                  >
+                    {{ obj.name }}
+                  </option>
+                </select>
+              </template>
               <!-- Sinon : sélection de la catégorie -->
               <select
                 v-else
@@ -85,12 +101,13 @@
 </template>
 
 <script setup lang="ts">
-import type { CsvPreviewLine, Category, Account } from '@/types'
+import type { CsvPreviewLine, Category, Account, Objective } from '@/types'
 
 defineProps<{
   lines: CsvPreviewLine[]
   categories: Category[]
   accounts: Account[]
+  objectives: Objective[]
   detectedFormat: string
 }>()
 
@@ -98,6 +115,7 @@ const emit = defineEmits<{
   'update-category': [lineNumber: number, categoryId: number]
   'toggle-transfer': [lineNumber: number]
   'update-linked-account': [lineNumber: number, accountId: number]
+  'update-linked-objective': [lineNumber: number, objectiveId: number | null]
 }>()
 
 const getCategoryId = (line: CsvPreviewLine): number => {
@@ -112,6 +130,10 @@ const getLinkedAccountId = (line: CsvPreviewLine): number => {
   return (line as any)._linkedAccountId ?? 0
 }
 
+const getLinkedObjectiveId = (line: CsvPreviewLine): number => {
+  return (line as any)._objectiveId ?? 0
+}
+
 const updateCategory = (lineNumber: number, categoryId: number) => {
   emit('update-category', lineNumber, categoryId)
 }
@@ -122,6 +144,10 @@ const toggleTransfer = (lineNumber: number) => {
 
 const updateLinkedAccount = (lineNumber: number, accountId: number) => {
   emit('update-linked-account', lineNumber, accountId)
+}
+
+const updateLinkedObjective = (lineNumber: number, objectiveId: number) => {
+  emit('update-linked-objective', lineNumber, objectiveId > 0 ? objectiveId : null)
 }
 
 const formatDate = (dateStr: string): string => {
@@ -179,9 +205,18 @@ const formatDate = (dateStr: string): string => {
   white-space: nowrap;
 }
 
+.preview-table th.col-amount {
+  text-align: right;
+}
+
+.preview-table th.col-internal {
+  text-align: center;
+}
+
 .preview-table td {
   padding: 8px 12px;
   border-bottom: 1px solid var(--border-color);
+  vertical-align: middle;
 }
 
 .preview-table tr:last-child td {
@@ -268,5 +303,11 @@ const formatDate = (dateStr: string): string => {
 .category-select:focus {
   outline: none;
   border-color: var(--primary-color);
+}
+
+.objective-select {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--text-secondary);
 }
 </style>

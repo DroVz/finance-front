@@ -318,11 +318,21 @@ onMounted(async () => {
     selectedAccountId.value = Number(accountParam);
   }
 
+  const monthParam = route.query.month;
+  if (monthParam) {
+    selectedMonth.value = String(monthParam);
+  }
+
   await Promise.all([
     accountStore.fetchAccounts(),
     categoryStore.fetchCategories(),
     loadTransactions()
   ]);
+
+  const categoryParam = route.query.categoryId;
+  if (categoryParam) {
+    selectedCategoryId.value = Number(categoryParam);
+  }
 });
 </script>
 

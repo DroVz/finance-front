@@ -38,7 +38,7 @@
     <TypeBreakdown v-if="stats" :stats="stats" :class="{ 'soft-loading': updatingStats }" />
 
     <!-- Breakdown catégories du mois sélectionné -->
-    <CategoryBreakdown v-if="stats" :stats="stats" :class="{ 'soft-loading': updatingStats }" />
+    <CategoryBreakdown v-if="stats" :stats="stats" :selected-month="selectedMonth" :class="{ 'soft-loading': updatingStats }" />
   </div>
 </template>
 

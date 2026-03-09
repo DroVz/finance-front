@@ -7,7 +7,8 @@
         <div
           v-for="[category, amount] in incomeEntries"
           :key="category"
-          class="category-item income"
+          class="category-item income clickable"
+          @click="handleCategoryClick(category)"
         >
           <span class="category-name">{{ category }}</span>
           <span class="category-amount">{{ formatCurrency(amount) }}</span>
@@ -30,7 +31,8 @@
         <div
           v-for="[category, amount] in expensesEntries"
           :key="category"
-          class="category-item expense"
+          class="category-item expense clickable"
+          @click="handleCategoryClick(category)"
         >
           <span class="category-name">{{ category }}</span>
           <span class="category-amount">{{ formatCurrency(amount) }}</span>
@@ -51,14 +53,25 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 import type { CashFlowStats } from '@/types';
 import { useFormatters } from '@/composables/useFormatters';
+import { useCategoryStore } from '@/stores/categoryStore';
 
 const props = defineProps<{
-  stats: CashFlowStats
+  stats: CashFlowStats;
+  selectedMonth: string;
 }>();
 
 const { formatCurrency } = useFormatters();
+const categoryStore = useCategoryStore();
+const router = useRouter();
+
+const handleCategoryClick = (categoryName: string) => {
+  const cat = categoryStore.categories.find(c => c.name === categoryName);
+  if (!cat) return;
+  router.push({ path: '/transactions', query: { month: props.selectedMonth, categoryId: cat.id } });
+};
 
 // Trier les revenus par montant décroissant
 const incomeEntries = computed(() => {
@@ -116,6 +129,10 @@ const totalExpenses = computed(() => props.stats.totalExpenses);
 
 .category-item:hover {
   background: var(--bg-hover);
+}
+
+.category-item.clickable {
+  cursor: pointer;
 }
 
 .category-item.income {
