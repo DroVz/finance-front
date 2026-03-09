@@ -1,66 +1,70 @@
 <template>
   <form @submit.prevent="handleSubmit" class="transaction-form">
-    <div class="form-group">
-      <label class="form-label">Date *</label>
-      <input
-        :value="modelValue.transactionDate"
-        @input="updateField('transactionDate', ($event.target as HTMLInputElement).value)"
-        type="date"
-        class="form-input"
-        required
-      />
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Date *</label>
+        <input
+          :value="modelValue.transactionDate"
+          @input="updateField('transactionDate', ($event.target as HTMLInputElement).value)"
+          type="date"
+          class="form-input"
+          required
+        />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Montant (€) *</label>
+        <input
+          :value="modelValue.amount"
+          @input="updateField('amount', Number(($event.target as HTMLInputElement).value))"
+          type="number"
+          step="0.01"
+          class="form-input"
+          placeholder="0.00"
+          required
+        />
+      </div>
     </div>
 
-    <div class="form-group">
-      <label class="form-label">Montant (€) *</label>
-      <input
-        :value="modelValue.amount"
-        @input="updateField('amount', Number(($event.target as HTMLInputElement).value))"
-        type="number"
-        step="0.01"
-        class="form-input"
-        placeholder="0.00"
-        required
-      />
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Compte source *</label>
-      <select
-        :value="modelValue.sourceAccountId"
-        @change="updateField('sourceAccountId', Number(($event.target as HTMLSelectElement).value))"
-        class="form-select"
-        required
-      >
-        <option :value="null" disabled>Sélectionner le compte source</option>
-        <option
-          v-for="account in accounts"
-          :key="account.id"
-          :value="account.id"
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Compte source *</label>
+        <select
+          :value="modelValue.sourceAccountId"
+          @change="updateField('sourceAccountId', Number(($event.target as HTMLSelectElement).value))"
+          class="form-select"
+          required
         >
-          {{ account.name }}
-        </option>
-      </select>
-    </div>
+          <option :value="null" disabled>Compte source</option>
+          <option
+            v-for="account in accounts"
+            :key="account.id"
+            :value="account.id"
+          >
+            {{ account.name }}
+          </option>
+        </select>
+      </div>
 
-    <div class="form-group">
-      <label class="form-label">Compte destination *</label>
-      <select
-        :value="modelValue.destinationAccountId"
-        @change="updateField('destinationAccountId', Number(($event.target as HTMLSelectElement).value))"
-        class="form-select"
-        required
-      >
-        <option :value="null" disabled>Sélectionner le compte destination</option>
-        <option
-          v-for="account in accounts"
-          :key="account.id"
-          :value="account.id"
-          :disabled="account.id === modelValue.sourceAccountId"
+      <div class="form-group">
+        <label class="form-label">Compte destination *</label>
+        <select
+          :value="modelValue.destinationAccountId"
+          @change="updateField('destinationAccountId', Number(($event.target as HTMLSelectElement).value))"
+          class="form-select"
+          required
         >
-          {{ account.name }}
-        </option>
-      </select>
+          <option :value="null" disabled>Compte destination</option>
+          <option
+            v-for="account in accounts"
+            :key="account.id"
+            :value="account.id"
+            :disabled="account.id === modelValue.sourceAccountId"
+          >
+            {{ account.name }}
+          </option>
+        </select>
+      </div>
     </div>
 
     <div class="form-group">
@@ -176,6 +180,16 @@ const handleSubmit = () => {
   margin-top: 24px;
 }
 
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.form-row .form-group {
+  margin-bottom: 12px;
+}
+
 .btn-block {
   width: 100%;
   margin-top: 8px;
@@ -187,6 +201,10 @@ const handleSubmit = () => {
   font-size: 12px;
   color: var(--text-secondary);
   font-style: italic;
+}
+
+.form-textarea {
+  min-height: 189px;
 }
 
 .error-message {

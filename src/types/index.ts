@@ -180,6 +180,7 @@ export interface CsvImportLine {
   categoryId: number;
   transfer: boolean;
   linkedAccountId: number | null;
+  objectiveId: number | null;
 }
 
 export interface CsvImportRequest {

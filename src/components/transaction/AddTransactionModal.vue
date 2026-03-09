@@ -45,6 +45,7 @@
     :show="showImportModal"
     :accounts="accountStore.accounts"
     :categories="categoryStore.categories"
+    :objectives="objectiveStore.activeObjectives"
     @close="showImportModal = false"
     @imported="handleImported"
   />
