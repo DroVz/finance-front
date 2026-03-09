@@ -1,0 +1,43 @@
+name: Deploy Frontend
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Sync sources to NAS
+        run: |
+          rsync -a --delete src/ /srv/docker/finance/front/finance-front/src/
+          rsync -a public/ /srv/docker/finance/front/finance-front/public/
+          cp package.json package-lock.json index.html vite.config.ts \
+             tsconfig.json tsconfig.node.json \
+             /srv/docker/finance/front/finance-front/
+
+      - name: Rebuild and restart frontend
+        run: |
+          cd /srv/docker/finance
+          docker compose up --build -d frontend
+          echo "✅ Frontend rebuilt and restarted"
+
+      - name: Health check
+        run: |
+          echo "Waiting for frontend..."
+          for i in $(seq 1 12); do
+            if curl -sf http://localhost:80/ > /dev/null 2>&1; then
+              echo "✅ Frontend is up"
+              exit 0
+            fi
+            echo "  attempt $i/12..."
+            sleep 5
+          done
+          echo "❌ Frontend did not start in time"
+          docker logs finance-frontend-1 --tail 30
+          exit 1

@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python /c/Users/Alex/Desktop/finance/scripts/generate_baseline.py)"
+    ]
+  }
+}
