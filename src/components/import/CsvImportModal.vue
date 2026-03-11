@@ -44,15 +44,18 @@
 
         <div class="preview-scroll">
           <CsvPreviewTable
-            :lines="previewLines"
+            :lines="displayLines"
             :categories="categories"
             :accounts="accounts"
             :objectives="objectives"
             :detected-format="detectedFormat"
+            :source-account-id="selectedAccountId"
             @update-category="handleCategoryUpdate"
             @toggle-transfer="handleToggleTransfer"
             @update-linked-account="handleLinkedAccountUpdate"
             @update-linked-objective="handleLinkedObjectiveUpdate"
+            @toggle-ignore="handleToggleIgnore"
+            @toggle-expand="handleToggleExpand"
           />
         </div>
 
@@ -72,7 +75,7 @@
             :disabled="!allLinesReady || loading"
             @click="handleConfirm"
           >
-            {{ loading ? 'Import en cours...' : `Importer ${previewLines.length} transactions` }}
+            {{ loading ? 'Import en cours...' : `Importer ${activeLines.length} transaction${activeLines.length !== 1 ? 's' : ''}` }}
           </button>
         </div>
       </div>
@@ -134,22 +137,35 @@ const learnCategories = ref(true)
 
 // Preview data
 const previewLines = ref<CsvPreviewLine[]>([])
+const displayLines = ref<CsvPreviewLine[]>([])
 const detectedFormat = ref('')
 const importResult = ref<CsvImportResult | null>(null)
 
-// Vérifier que toutes les lignes sont prêtes pour l'import
+// Lignes actives (non ignorées) — filtre sur toutes les lignes, pas seulement les représentantes
+const activeLines = computed(() => previewLines.value.filter(line => !(line as any)._ignored))
+
+// Vérifier que toutes les lignes actives sont prêtes pour l'import
 const allLinesReady = computed(() => {
-  return previewLines.value.every(line => {
+  return activeLines.value.every(line => {
     const isTransfer = (line as any)._isTransfer === true
     if (isTransfer) {
-      // Virement : besoin d'un compte lié
       return (line as any)._linkedAccountId != null && (line as any)._linkedAccountId > 0
     } else {
-      // Transaction normale : besoin d'une catégorie
       return line.suggestedCategoryId != null && line.suggestedCategoryId > 0
     }
   })
 })
+
+// Helper : applique une action à toutes les lignes du même groupe
+const forEachInGroup = (lineNumber: number, fn: (line: any) => void) => {
+  const target = previewLines.value.find(l => l.lineNumber === lineNumber) as any
+  if (!target) return
+  const nums: number[] = target._groupLineNumbers ?? [lineNumber]
+  nums.forEach(num => {
+    const l = previewLines.value.find(x => x.lineNumber === num) as any
+    if (l) fn(l)
+  })
+}
 
 // Actions
 const triggerFileInput = () => {
@@ -184,20 +200,54 @@ const handlePreview = async () => {
   uploadError.value = null
 
   try {
-    const response = await csvImportService.preview(selectedFile.value)
-    // Pré-cocher les lignes détectées comme virements potentiels
+    const response = await csvImportService.preview(selectedFile.value, selectedAccountId.value!)
+
+    // Mapping initial
     const mapped = response.lines.map(line => ({
       ...line,
       _isTransfer: line.transferCandidate,
-      _linkedAccountId: null
+      _linkedAccountId: null,
+      _ignored: line.potentialDuplicate === true
     }))
-    // Trier : revenus en haut, dépenses en bas
+
+    // Tri : revenus en haut, dépenses en bas
     mapped.sort((a, b) => {
       if (a.type === 'INCOME' && b.type !== 'INCOME') return -1
       if (a.type !== 'INCOME' && b.type === 'INCOME') return 1
       return 0
     })
+
+    // Calcul des groupes par (description, montant, type)
+    const groupMap = new Map<string, number[]>()
+    mapped.forEach(line => {
+      const key = `${line.description}|${line.amount}|${line.type}`
+      ;(line as any)._groupKey = key
+      if (!groupMap.has(key)) groupMap.set(key, [])
+      groupMap.get(key)!.push(line.lineNumber)
+    })
+
+    // Assignation des métadonnées de groupe à chaque ligne
+    mapped.forEach(line => {
+      const nums = groupMap.get((line as any)._groupKey)!
+      ;(line as any)._groupCount = nums.length
+      ;(line as any)._groupLineNumbers = nums
+      ;(line as any)._expandedGroup = false
+    })
+
+    // displayLines = 1 représentant par groupe, avec _groupChildren (les autres lignes du groupe)
+    const seen = new Set<string>()
+    const display = mapped.filter(line => {
+      const key = (line as any)._groupKey
+      if (seen.has(key)) return false
+      seen.add(key)
+      ;(line as any)._groupChildren = mapped.filter(
+        l => (l as any)._groupKey === key && l.lineNumber !== line.lineNumber
+      )
+      return true
+    })
+
     previewLines.value = mapped as any
+    displayLines.value = display as any
     detectedFormat.value = response.detectedFormat
     step.value = 'preview'
   } catch (e: any) {
@@ -208,36 +258,47 @@ const handlePreview = async () => {
 }
 
 const handleCategoryUpdate = (lineNumber: number, categoryId: number) => {
-  const line = previewLines.value.find(l => l.lineNumber === lineNumber)
-  if (line) {
+  const category = props.categories.find(c => c.id === categoryId)
+  forEachInGroup(lineNumber, line => {
     line.suggestedCategoryId = categoryId
-    const category = props.categories.find(c => c.id === categoryId)
     line.suggestedCategoryName = category?.name ?? null
-  }
+  })
 }
 
 const handleToggleTransfer = (lineNumber: number) => {
-  const line = previewLines.value.find(l => l.lineNumber === lineNumber) as any
-  if (line) {
-    line._isTransfer = !line._isTransfer
-    if (!line._isTransfer) {
-      line._linkedAccountId = null
-    }
-  }
+  const representative = previewLines.value.find(l => l.lineNumber === lineNumber) as any
+  if (!representative) return
+  const newState = !representative._isTransfer
+  forEachInGroup(lineNumber, line => {
+    line._isTransfer = newState
+    if (!newState) line._linkedAccountId = null
+  })
 }
 
 const handleLinkedAccountUpdate = (lineNumber: number, accountId: number) => {
-  const line = previewLines.value.find(l => l.lineNumber === lineNumber) as any
-  if (line) {
+  forEachInGroup(lineNumber, line => {
     line._linkedAccountId = accountId
-  }
+  })
 }
 
 const handleLinkedObjectiveUpdate = (lineNumber: number, objectiveId: number | null) => {
-  const line = previewLines.value.find(l => l.lineNumber === lineNumber) as any
-  if (line) {
+  forEachInGroup(lineNumber, line => {
     line._objectiveId = objectiveId
-  }
+  })
+}
+
+const handleToggleIgnore = (lineNumber: number) => {
+  const representative = previewLines.value.find(l => l.lineNumber === lineNumber) as any
+  if (!representative) return
+  const newState = !representative._ignored
+  forEachInGroup(lineNumber, line => {
+    line._ignored = newState
+  })
+}
+
+const handleToggleExpand = (lineNumber: number) => {
+  const line = previewLines.value.find(l => l.lineNumber === lineNumber) as any
+  if (line) line._expandedGroup = !line._expandedGroup
 }
 
 const handleConfirm = async () => {
@@ -250,7 +311,7 @@ const handleConfirm = async () => {
     const request = {
       accountId: selectedAccountId.value,
       learnCategories: learnCategories.value,
-      lines: previewLines.value.map(line => {
+      lines: activeLines.value.map(line => {
         const isTransfer = (line as any)._isTransfer === true
         return {
           date: line.date,
@@ -280,6 +341,7 @@ const handleNewFile = () => {
   selectedFile.value = null
   uploadError.value = null
   previewLines.value = []
+  displayLines.value = []
   importResult.value = null
 }
 
@@ -293,6 +355,7 @@ const handleClose = () => {
   selectedFile.value = null
   uploadError.value = null
   previewLines.value = []
+  displayLines.value = []
   importResult.value = null
   emit('close')
 }

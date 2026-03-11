@@ -72,11 +72,22 @@ export const useTransactionStore = defineStore('transaction', () => {
   const updateTransaction = async (id: number, transactionData: TransactionDTO) => {
     loading.value = true;
     error.value = null;
+    const linkedId = transactions.value.find(t => t.id === id)?.linkedTransactionId ?? null;
     try {
       const updated = await transactionService.update(id, transactionData);
       const index = transactions.value.findIndex(t => t.id === id);
       if (index !== -1) {
         transactions.value[index] = updated;
+      }
+      if (linkedId !== null) {
+        const linkedIndex = transactions.value.findIndex(t => t.id === linkedId);
+        if (linkedIndex !== -1) {
+          transactions.value[linkedIndex] = {
+            ...transactions.value[linkedIndex],
+            amount: updated.amount,
+            description: updated.description,
+          };
+        }
       }
       return updated;
     } catch (e: any) {
@@ -123,9 +134,10 @@ export const useTransactionStore = defineStore('transaction', () => {
     loading.value = true;
     error.value = null;
     try {
+      // Récupère l'ID de la transaction liée avant suppression (cas virement)
+      const linkedId = transactions.value.find(t => t.id === id)?.linkedTransactionId ?? null;
       await transactionService.delete(id);
-      transactions.value = transactions.value.filter(t => t.id !== id);
-      // Si c'était un virement, la transaction liée est aussi supprimée côté backend
+      transactions.value = transactions.value.filter(t => t.id !== id && t.id !== linkedId);
     } catch (e: any) {
       error.value = e.response?.data?.message || 'Erreur lors de la suppression de la transaction';
       throw e;

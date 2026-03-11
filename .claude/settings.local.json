@@ -1,7 +1,18 @@
 {
   "permissions": {
     "allow": [
-      "Bash(python /c/Users/Alex/Desktop/finance/scripts/generate_baseline.py)"
+      "Bash(python /c/Users/Alex/Desktop/finance/scripts/generate_baseline.py)",
+      "Bash(psql:*)",
+      "Bash(mvn dependency:tree:*)",
+      "Bash(jar tf:*)",
+      "Bash(unzip:*)",
+      "Bash(find /c/finance-project/finance-back/src/main/java/com/financemanager -type f -name *.java)",
+      "Bash(find c:/finance-project/finance-back -name *.iml -o -name misc.xml)",
+      "Read(//c/Program Files/Java/**)",
+      "Read(//c/Program Files/**)",
+      "Read(//c/Program Files/Microsoft/**)",
+      "Read(//c//**)",
+      "Read(//c/Users/alexr/.jdks/**)"
     ]
   }
 }

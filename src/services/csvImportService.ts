@@ -8,9 +8,10 @@ const csvImportService = {
   /**
    * Envoie un fichier CSV pour obtenir un aperçu des transactions détectées
    */
-  async preview(file: File): Promise<CsvPreviewResponse> {
+  async preview(file: File, accountId: number): Promise<CsvPreviewResponse> {
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('accountId', accountId.toString());
 
     const response = await api.post<CsvPreviewResponse>('/import/preview', formData, {
       headers: {

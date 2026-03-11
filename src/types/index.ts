@@ -164,6 +164,7 @@ export interface CsvPreviewLine {
   suggestedCategoryId: number | null;
   suggestedCategoryName: string | null;
   transferCandidate: boolean;
+  potentialDuplicate?: boolean;
 }
 
 export interface CsvPreviewResponse {

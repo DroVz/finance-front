@@ -58,8 +58,10 @@
           <tbody>
             <tr v-for="user in users" :key="user.id" :class="{ 'current-user-row': user.username === authStore.username }">
               <td class="username-cell">
-                {{ user.username }}
-                <span v-if="user.username === authStore.username" class="self-badge">Vous</span>
+                <div class="username-inner">
+                  {{ user.username }}
+                  <span v-if="user.username === authStore.username" class="self-badge">Vous</span>
+                </div>
               </td>
               <td>
                 <span class="role-badge" :class="user.role === 'ROLE_ADMIN' ? 'role-admin' : 'role-user'">
@@ -253,6 +255,9 @@ onMounted(loadUsers);
 
 .username-cell {
   font-weight: 500;
+}
+
+.username-inner {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -276,12 +281,12 @@ onMounted(loadUsers);
 }
 
 .role-admin {
-  background: #fff3cd;
-  color: #856404;
+  background: var(--bg-warning-tint);
+  color: var(--text-warning-tint);
 }
 
 .role-user {
-  background: var(--bg-secondary);
+  background: var(--bg-item);
   color: var(--text-secondary);
 }
 
