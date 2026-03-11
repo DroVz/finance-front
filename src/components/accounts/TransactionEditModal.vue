@@ -1,6 +1,10 @@
 <template>
   <BaseModal :show="show" @close="emit('close')">
-    <h3 class="modal-title">Modifier la transaction</h3>
+    <h3 class="modal-title">{{ isTransfer ? 'Modifier le virement' : 'Modifier la transaction' }}</h3>
+
+    <p v-if="isTransfer" class="transfer-info">
+      Les deux côtés du virement seront mis à jour.
+    </p>
 
     <form @submit.prevent="handleSave" class="edit-form">
       <div class="form-group">
@@ -14,7 +18,7 @@
         />
       </div>
 
-      <div class="form-group">
+      <div v-if="!isTransfer" class="form-group">
         <label class="form-label">Catégorie</label>
         <select v-model.number="form.categoryId" class="form-select">
           <option :value="null">Sans catégorie</option>
@@ -46,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, watch } from 'vue'
+import { reactive, watch, computed } from 'vue'
 import BaseModal from '@/components/base/BaseModal.vue'
 import type { Transaction, TransactionDTO, Category } from '@/types'
 
@@ -60,6 +64,8 @@ const emit = defineEmits<{
   close: []
   save: [dto: TransactionDTO]
 }>()
+
+const isTransfer = computed(() => props.transaction?.linkedTransactionId !== null && props.transaction?.linkedTransactionId !== undefined)
 
 const form = reactive({
   amount: 0,
@@ -104,6 +110,15 @@ const handleSave = () => {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.transfer-info {
+  font-size: 13px;
+  color: var(--primary-color);
+  background: var(--bg-info-tint);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 4px;
 }
 
 .modal-actions {

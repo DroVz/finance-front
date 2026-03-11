@@ -4,7 +4,10 @@
     <input
       type="checkbox"
       class="transaction-checkbox"
-      :class="{ visible: selectionActive && !isTransfer, 'sr-hidden': isTransfer }"
+      :class="{
+        visible: selectionActive && !isTransfer,
+        'sr-hidden': isTransfer,
+      }"
       :checked="selected"
       @change="!isTransfer && emit('toggle-select', transaction.id)"
       @click.stop
@@ -12,33 +15,50 @@
 
     <div
       class="transaction-icon"
-      :class="!transaction.categoryColor ? `icon-${transaction.type.toLowerCase()}` : ''"
-      :style="transaction.categoryColor ? { background: transaction.categoryColor + '20', color: transaction.categoryColor } : {}"
+      :class="
+        !transaction.categoryColor
+          ? `icon-${transaction.type.toLowerCase()}`
+          : ''
+      "
+      :style="
+        transaction.categoryColor
+          ? {
+              background: transaction.categoryColor + '20',
+              color: transaction.categoryColor,
+            }
+          : {}
+      "
     >
       {{ icon }}
     </div>
 
     <div class="transaction-info">
       <div class="transaction-header">
-        <span class="transaction-category">{{ transaction.categoryName || 'Virement' }}</span>
-        <span class="transaction-account-badge">{{ transaction.accountName }}</span>
+        <span class="transaction-category">{{
+          transaction.categoryName || "Virement"
+        }}</span>
+        <span class="transaction-account-badge">{{
+          transaction.accountName
+        }}</span>
       </div>
       <div class="transaction-description">
-        {{ transaction.description || 'Aucune description' }}
+        {{ transaction.description || "Aucune description" }}
       </div>
       <div class="transaction-date">
         {{ formattedDate }}
       </div>
     </div>
 
-    <div class="transaction-amount" :class="`amount-${transaction.type.toLowerCase()}`">
+    <div
+      class="transaction-amount"
+      :class="`amount-${transaction.type.toLowerCase()}`"
+    >
       {{ formattedAmount }}
     </div>
 
     <div class="transaction-actions">
       <button
         class="btn-action"
-        :style="isTransfer ? { visibility: 'hidden', pointerEvents: 'none' } : {}"
         title="Modifier"
         @click="emit('edit', transaction)"
       >
@@ -57,30 +77,37 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useFormatters } from '@/composables/useFormatters'
-import type { Transaction } from '@/types'
-import IconTrash from '@/components/base/IconTrash.vue'
-import IconEdit from '@/components/base/IconEdit.vue'
+import { computed } from "vue";
+import { useFormatters } from "@/composables/useFormatters";
+import type { Transaction } from "@/types";
+import IconTrash from "@/components/base/IconTrash.vue";
+import IconEdit from "@/components/base/IconEdit.vue";
 
 const props = defineProps<{
-  transaction: Transaction
-  selected?: boolean
-  selectionActive?: boolean
-}>()
+  transaction: Transaction;
+  selected?: boolean;
+  selectionActive?: boolean;
+}>();
 
 const emit = defineEmits<{
-  delete: [id: number]
-  edit: [transaction: Transaction]
-  'toggle-select': [id: number]
-}>()
+  delete: [id: number];
+  edit: [transaction: Transaction];
+  "toggle-select": [id: number];
+}>();
 
-const { formatDate, formatTransactionAmount, getTransactionIcon } = useFormatters()
+const { formatDate, formatTransactionAmount, getTransactionIcon } =
+  useFormatters();
 
-const isTransfer = computed(() => props.transaction.linkedTransactionId !== null)
-const icon = computed(() => getTransactionIcon(props.transaction.type))
-const formattedDate = computed(() => formatDate(props.transaction.transactionDate))
-const formattedAmount = computed(() => formatTransactionAmount(props.transaction))
+const isTransfer = computed(
+  () => props.transaction.linkedTransactionId !== null,
+);
+const icon = computed(() => getTransactionIcon(props.transaction.type));
+const formattedDate = computed(() =>
+  formatDate(props.transaction.transactionDate),
+);
+const formattedAmount = computed(() =>
+  formatTransactionAmount(props.transaction),
+);
 </script>
 
 <style scoped>
@@ -239,6 +266,5 @@ const formattedAmount = computed(() => formatTransactionAmount(props.transaction
     text-align: left;
     margin-top: 8px;
   }
-
 }
 </style>
