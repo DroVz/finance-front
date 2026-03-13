@@ -1,39 +1,45 @@
 <template>
   <div id="app">
-    <Header v-if="!isLoginPage" />
-    <main class="main-content" :class="{ 'no-header': isLoginPage }">
-      <div class="container" :class="{ 'full-height': isLoginPage }">
-        <RouterView />
-      </div>
-    </main>
+    <template v-if="isReady">
+      <Header v-if="!isLoginPage" />
+      <main class="main-content" :class="{ 'no-header': isLoginPage }">
+        <div class="container" :class="{ 'full-height': isLoginPage }">
+          <RouterView />
+        </div>
+      </main>
 
-    <!-- FAB Ajouter une transaction -->
-    <button
-      v-if="!isLoginPage"
-      class="fab"
-      title="Ajouter une transaction"
-      @click="showAddModal = true"
-    >
-      ＋
-    </button>
+      <!-- FAB Ajouter une transaction -->
+      <button
+        v-if="!isLoginPage"
+        class="fab"
+        title="Ajouter une transaction"
+        @click="showAddModal = true"
+      >
+        ＋
+      </button>
 
-    <AddTransactionModal
-      v-if="!isLoginPage"
-      :show="showAddModal"
-      @close="showAddModal = false"
-    />
+      <AddTransactionModal
+        v-if="!isLoginPage"
+        :show="showAddModal"
+        @close="showAddModal = false"
+      />
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { RouterView, useRoute } from 'vue-router';
+import { RouterView, useRoute, useRouter } from 'vue-router';
 import Header from '@/components/Header.vue';
 import AddTransactionModal from '@/components/transaction/AddTransactionModal.vue';
 
 const route = useRoute();
+const router = useRouter();
 const isLoginPage = computed(() => route.name === 'Login');
 const showAddModal = ref(false);
+
+const isReady = ref(false);
+router.isReady().then(() => { isReady.value = true; });
 </script>
 
 <style scoped>
