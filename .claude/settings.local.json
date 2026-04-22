@@ -12,7 +12,8 @@
       "Read(//c/Program Files/**)",
       "Read(//c/Program Files/Microsoft/**)",
       "Read(//c//**)",
-      "Read(//c/Users/alexr/.jdks/**)"
+      "Read(//c/Users/alexr/.jdks/**)",
+      "Bash(ssh -p 1222 sshAlex@192.168.1.23 \"cd /srv/docker/finance && docker compose ps --format json\")"
     ]
   }
 }

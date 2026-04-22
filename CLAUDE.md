@@ -58,5 +58,3 @@ Categories have a `type`: `CHARGES`, `LOISIRS`, or `REVENUS`. The `defaultCatego
 ```bash
 python ../scripts/deploy.py   # uploads src/ to NAS and rebuilds Docker containers
 ```
-
-NAS: `192.168.1.23:1222`, user `sshAlex`, app at `/srv/docker/finance/`. Uses `docker compose` (v2).

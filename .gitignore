@@ -27,3 +27,4 @@ ssh.md
 *.njsproj
 *.sln
 *.sw?
+.claude
